@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Add Note</title>
+</head>
+<body>
+<h2>Add Note</h2>
+<form id="addNoteForm">
+  <div>
+    <label for="noteContent">Note Content:</label>
+    <textarea id="noteContent" name="noteContent" required></textarea>
+  </div>
+  <div>
+    <button onclick="window.history.back();">add Note</button>
+  </div>
+</form>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $('#addNoteForm').submit(function(e) {
+      e.preventDefault();
+      var noteContent = $('#noteContent').val();
+
+      // 发起 AJAX 请求向后端提交笔记内容
+      $.ajax({
+        type: 'POST',
+        url: '/notes',
+        data: JSON.stringify({ content: noteContent }),
+        contentType: 'application/json',
+        success: function(response) {
+          alert('Note added successfully');
+          // 可以根据需要进行页面重定向或其他操作
+          window.location.href='addNote.html';
+        },
+        error: function(error) {
+          alert('An error occurred');
+        }
+      });
+    });
+  });
+</script>
+</body>
+</html>

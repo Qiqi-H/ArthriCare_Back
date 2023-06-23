@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Medication</title>
+</head>
+<body>
+<h1>Add Medication</h1>
+
+<form id="addMedicationForm">
+    <div>
+        <label for="medicationType">Medication Type:</label>
+        <select id="medicationType" required>
+            <option value="medication">Medication</option>
+            <option value="other">Other Medication</option>
+        </select>
+    </div>
+    <div>
+        <label for="medicationCategory">Medication Category:</label>
+        <select id="medicationCategory" required>
+            <option value="table">Table</option>
+            <option value="pill">Pill</option>
+            <option value="injection">Injection</option>
+            <option value="drop">Drop</option>
+        </select>
+    </div>
+    <div>
+        <label for="frequency">Frequency:</label>
+        <select id="frequency" required>
+            <option value="once">Once a day</option>
+            <option value="twice">Twice a day</option>
+            <option value="thrice">Three times a day</option>
+        </select>
+    </div>
+    <div>
+        <label for="dosageUnit">Dosage Unit:</label>
+        <select id="dosageUnit" required>
+            <option value="0.5">0.5 mg</option>
+            <option value="1.0">1.0 mg</option>
+            <option value="1.5">1.5 mg</option>
+            <option value="2.0">2.0 mg</option>
+            <option value="2.5">2.5 mg</option>
+            <!-- 可以根据需要添加更多选项 -->
+        </select>
+    </div>
+    <div>
+        <label for="startDay">Start Day:</label>
+        <input type="date" id="startDay" required>
+    </div>
+    <div>
+        <label for="endDay">End Day:</label>
+        <input type="date" id="endDay" required>
+    </div>
+    <button type="submit">Add Medication</button>
+    <button type="button" id="addNoteButton">Add Note</button>
+</form>
+
+<div id="response"></div>
+
+<script>
+    document.getElementById("addMedicationForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        var loggedInUser = sessionStorage.getItem('loggedInUser');
+        if (loggedInUser) {
+            loggedInUser = JSON.parse(loggedInUser);
+        } else {
+            // 如果用户未登录，可以根据需求进行逻辑处理，如跳转到登录页面
+            window.location.href = 'index.html';
+        }
+        var userId = loggedInUser.id;
+
+        var urlParams = new URLSearchParams(window.location.search);
+        var medicationName = urlParams.get("medicationName");
+
+
+        var medicationType = document.getElementById("medicationType").value;
+        var medicationCategory = document.getElementById("medicationCategory").value;
+        var frequency = document.getElementById("frequency").value;
+        var dosageUnit = document.getElementById("dosageUnit").value;
+        var startDate = document.getElementById("startDay").value;
+        var endDate = document.getElementById("endDay").value;
+
+        var note = sessionStorage.getItem('note');
+
+        var medication = {
+            userId:userId,
+            medicationName: medicationName,
+            medicationType: medicationType,
+            medicationCategory: medicationCategory,
+            frequency: frequency,
+            dosageUnit: dosageUnit,
+            startDate: startDate,
+            endDate: endDate,
+            note:note
+        }
+
+        sessionStorage.removeItem('note');
+        console.log(medication);
+        fetch("/medications/create", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(medication)
+        })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = 'userInfor.html';
+                } else {
+                    document.getElementById("response").innerText = "Failed to add medication.";
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                document.getElementById("response").innerText = "An error occurred while adding medication.";
+            });
+    });
+
+    document.getElementById("addNoteButton").addEventListener("click", function() {
+        var note = window.prompt("Please enter your note");
+        if (note !== null) {
+            sessionStorage.setItem('note', note);
+        }
+    });
+</script>
+</body>
+</html>

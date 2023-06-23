@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Login Page</title>
+    <style>
+        /* CSS 样式 */
+        /* 样式可根据需求进行自定义 */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 300px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        .btn-login {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-login:hover {
+            background-color: #45a049;
+        }
+        .btn-signup {
+            width: 100%;
+            padding: 10px;
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn-signup:hover {
+            background-color: #006080;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>User Login</h2>
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn-login">Login</button>
+    </form>
+    <button class="btn-signup" onclick="redirectToSignUp()">Sign Up</button>
+</div>
+
+<script>
+    // JavaScript 代码
+    // 使用 JavaScript 监听表单提交事件，并发送登录请求到后端
+    document.getElementById('loginForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // 阻止表单默认提交行为
+        //location.href = 'medication.html';
+        var email = document.getElementById('email').value;
+        var password = document.getElementById('password').value;
+
+        // 发送登录请求到后端，可以使用 fetch 或其他 AJAX 方法
+        // 这里仅作示例，假设后端登录接口为 /api/login
+        fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json;charset=UTF-8'
+            },
+            body: JSON.stringify({ email: email, password: password })
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+
+                // 检查登录是否成功，可以根据实际需求进行逻辑判断
+                if (data.id != null) {
+                    // 登录成功，将用户信息保存到 sessionStorage
+                    sessionStorage.setItem('loggedInUser', JSON.stringify(data));
+
+                    // 重定向到 medication.html
+                    location.href = 'userInfor.html';
+                } else {
+                    // 登录失败，显示错误信息
+                    //console.log(data.message);
+                }
+            })
+            .catch(error => {
+                // 处理错误
+                console.error(error);
+            });
+    });
+
+    function redirectToSignUp() {
+        location.href = 'signUp.html';
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Autocomplete Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script>
+        $(function() {
+            $("#search-input").autocomplete({
+                source: function(request, response) {
+                    // 发送 AJAX 请求获取自动补全建议
+                    $.ajax({
+                        url: "/suggestSearch",  // 替换为你的自动补全接口 URL
+                        type: "GET",
+                        data: {
+                            prefix: request.term
+                        },
+                        success: function(data) {
+                            console.log(data);
+                            response(data);  // 将返回的建议列表传递给自动补全插件
+                        }
+                    });
+                },
+                minLength: 1,
+                select: function(event, ui) {
+                    // 当用户选择一个建议项时，该回调函数会被触发
+                    var selectedValue = ui.item.value;
+
+                    // 在这里进行后续处理，例如输出到控制台
+                    console.log("Selected value:", selectedValue);
+                }
+            });
+
+            $("#confirm-button").click(function() {
+                var selectedValue = $("#search-input").val();
+                var nextPageUrl = "medication.html?medicationName=" + encodeURIComponent(selectedValue);
+                window.location.href = nextPageUrl;
+                console.log("Selected value:", selectedValue);
+            });
+        });
+    </script>
+</head>
+<body>
+<h1>Autocomplete Test</h1>
+<input type="text" id="search-input" placeholder="Enter search term..." required>
+<button id="confirm-button">Confirm</button>
+</body>
+</html>
