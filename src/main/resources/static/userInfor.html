@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Information Page</title>
+</head>
+<body>
+<h1>User Information Page</h1>
+
+<div id="userInfo"></div>
+<div id="medicationContainer"></div>
+<button onclick="window.location.href='autoSuggest.html';">add Medication</button>
+<button onclick="window.location.href='resetPassword.html';">reset Password</button>
+
+<script>
+    // JavaScript 代码
+    // 从 sessionStorage 获取登录用户信息，并显示在页面上
+    var loggedInUser = sessionStorage.getItem('loggedInUser');
+    if (loggedInUser) {
+        loggedInUser = JSON.parse(loggedInUser);
+        document.getElementById('userInfo').innerText = 'Logged in user: ' + loggedInUser.name;
+
+        // 发起请求从后端获取用户的药物列表数据
+        fetch('/medications/findMedicationByUserId/' + loggedInUser.id)
+            .then(response => response.json()) // This will parse the response as JSON
+            .then(function(medications) {
+                var medicationContainer = document.getElementById('medicationContainer');
+                medicationContainer.innerHTML = '';
+
+                //console.log(medications);
+                // 遍历药物列表，生成每个药物的信息
+                medications.forEach(function (medication) {
+                    console.log(medication);
+                    var medicationElement = document.createElement('div');
+                    medicationElement.textContent = 'Medication Name: ' + medication.medicationName + ', Start Date: ' + new Date(medication.startDate).toDateString();
+
+                    // 如果note存在，则添加到文本内容中
+                    if (medication.note!=null) {
+                        medicationElement.textContent += ', Note: ' + medication.note;
+                    }
+
+                    // 将展示元素添加到容器中
+                    medicationContainer.appendChild(medicationElement);
+                });
+            })
+            .catch(error => {
+                console.log('Error fetching user information:', error);
+            });
+    } else {
+        // 如果用户未登录，可以根据需求进行逻辑处理，如跳转到登录页面
+        window.location.href = 'index.html';
+    }
+</script>
+</body>
+</html>
+
