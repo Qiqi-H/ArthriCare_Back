@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Medication Tasks</title>
+  <style>
+    /* 自定义未完成任务按钮样式 */
+    .task-button {
+      background-color: white;
+    }
+
+    /* 自定义完成任务按钮样式 */
+    .task-button.completed {
+      background-color: grey;
+    }
+
+    /* 自定义可点击状态按钮样式 */
+    .task-button.clickable {
+      background-color: lightyellow;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+<h1>Medication Tasks</h1>
+
+<!-- 任务列表 -->
+<ul id="taskList">
+  <li><button class="task-button" onclick="completeTask(this, 100)" disabled>Taking medications</button></li>
+  <li><button class="task-button" onclick="completeTask(this, 150)" disabled>Create medication schedules</button></li>
+  <li><button class="task-button" onclick="completeTask(this, 100)" disabled>Upload information related to medications</button></li>
+  <li><button class="task-button" id="LoginTaskButton" onclick="completeLoginTask(this, 35)" disabled>Daily login</button></li>
+  <li><button class="task-button" id="ProfileTaskButton" onclick="completeProfileTask(this, 100)" disabled>Completed profile</button></li>
+</ul>
+<button onclick="window.location.href='userInfor.html';">User Infor page</button>
+<!-- JavaScript 代码 -->
+<script>
+
+  var loggedInUser = sessionStorage.getItem('loggedInUser');
+
+  if (loggedInUser) {
+    loggedInUser = JSON.parse(loggedInUser);
+    // Function to send a request to the backend when the page loads
+    document.addEventListener("DOMContentLoaded", function() {
+      fetch('/rewards/checkLoginRewardStatue/' + loggedInUser.id)
+              .then(response => response.json()) // This will parse the response as JSON
+              .then(function(alreadyClaimedLoginReward) {
+                if (alreadyClaimedLoginReward) {
+                  // If the daily login reward is already claimed, enable the button
+                  const LoginTaskButton = document.getElementById('LoginTaskButton');
+                  LoginTaskButton.disabled = false;
+                  LoginTaskButton.classList.add('clickable');
+                }
+              })
+              .catch(error => {
+                console.log('Error fetching user information:', error);
+              });
+
+      fetch('/rewards/checkProfileRewardStatue/' + loggedInUser.id)
+              .then(response => response.json()) // This will parse the response as JSON
+              .then(function(ProfileRewardCanBeClaimed) {
+                console.log(ProfileRewardCanBeClaimed)
+                if (ProfileRewardCanBeClaimed) {
+                  // If the daily login reward is already claimed, enable the button
+                  const ProfileTaskButton = document.getElementById('ProfileTaskButton');
+                  ProfileTaskButton.disabled = false;
+                  ProfileTaskButton.classList.add('clickable');
+                }
+              })
+              .catch(error => {
+                console.log('Error fetching user information:', error);
+              });
+    });
+  } else {
+    // 用户未登录，根据需求进行逻辑处理，例如跳转到登录页面
+    window.location.href = 'index.html';
+  }
+
+  // 任务完成时，将任务按钮样式修改为已完成状态，并从列表中移除任务
+
+
+  function completeLoginTask(button, points) {
+    button.classList.add('completed'); // 添加完成任务样式
+    button.disabled = true; // 禁用按钮，防止再次点击
+    // Show the message directly without the delay
+    alert(`Configuration, you get point ${points}`);
+
+    // Claim login reward by making a PUT request to the backend
+    fetch('/rewards/claimLoginReward/' + loggedInUser.id, {
+      method: 'PUT',
+    })
+            .then(response => {
+              if (response.ok) {
+                // The reward was successfully claimed
+                // You can perform additional actions here if needed
+                console.log('Reward claimed successfully');
+              } else {
+                throw new Error('Failed to claim reward.');
+              }
+            })
+            .catch(error => {
+              console.log('Error claiming reward:', error);
+            });
+  }
+
+  function completeProfileTask(button, points) {
+    button.classList.add('completed'); // 添加完成任务样式
+    button.disabled = true; // 禁用按钮，防止再次点击
+    // Show the message directly without the delay
+    alert(`Configuration, you get point ${points}`);
+
+    // Claim login reward by making a PUT request to the backend
+    fetch('/rewards/claimProfileReward/' + loggedInUser.id, {
+      method: 'PUT',
+    })
+            .then(response => {
+              if (response.ok) {
+                // The reward was successfully claimed
+                // You can perform additional actions here if needed
+                console.log('Reward claimed successfully');
+              } else {
+                throw new Error('Failed to claim reward.');
+              }
+            })
+            .catch(error => {
+              console.log('Error claiming reward:', error);
+            });
+  }
+</script>
+</body>
+</html>

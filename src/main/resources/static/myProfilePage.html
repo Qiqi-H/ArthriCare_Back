@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<p>Welcome, <span id="userName"></span>!</p>
+<form id="updateForm">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name">
+    <br>
+    <label for="gender">Gender:</label>
+    <select id="gender" name="gender" required>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+    </select>
+    <br>
+    <label for="weight">Weight (kg):</label>
+    <input type="number" id="weight" name="weight" step="0.01">
+    <br>
+    <label for="age">Age:</label>
+    <input type="number" id="age" name="age">
+    <br>
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required>
+    <br>
+    <button type="button" id="saveButton">Save</button>
+
+</form>
+    <button onclick="window.location.href='homePage.html';">Home Page</button>
+<script>
+    function populateUserInfo(userProfile) {
+        document.getElementById('name').value = userProfile.name;
+        document.getElementById('gender').value = userProfile.gender;
+        document.getElementById('weight').value = userProfile.weight;
+        document.getElementById('age').value = userProfile.age;
+        document.getElementById('email').value = userProfile.email;
+    }
+
+    function saveUserInfo() {
+        var loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
+        var name = document.getElementById('name').value;
+        var gender = document.getElementById('gender').value;
+        var weight = document.getElementById('weight').value;
+        var age = document.getElementById('age').value;
+        var email = document.getElementById('email').value;
+
+        var updatedUserInfo = {
+            id:loggedInUser.id,
+            name: name,
+            gender: gender,
+            weight: weight,
+            age: age,
+            email: email
+        };
+
+        console.log(updatedUserInfo);
+
+        // 发送POST请求到后台进行更新
+        fetch('/api/updateUserInformation', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json;charset=UTF-8'
+            },
+            body: JSON.stringify(updatedUserInfo)
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Failed to update user information.');
+                }
+            })
+            .then(data => {
+                // 更新成功后从后端获取返回的用户数据
+                // 将用户数据存储到 sessionStorage 的 loggedInUser 中
+                sessionStorage.setItem('loggedInUser', JSON.stringify(data));
+                alert("information change successfully")
+                // 刷新页面
+                location.reload();
+            })
+            .catch(error => {
+                // 处理错误
+                console.error(error);
+                alert(error.message); // 显示错误消息
+            });
+
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // 获取sessionStorage中的loggedInUser
+        var loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
+
+        // 如果sessionStorage中有loggedInUser，则使用其信息填充表单
+        if (loggedInUser) {
+            populateUserInfo(loggedInUser);
+            // Check if the 'name' property is not empty in the loggedInUser object
+            const userName = loggedInUser.name.trim() !== '' ? loggedInUser.name : 'guest';
+            // Set the greeting message with the user's name or 'guest' if it's empty
+            document.getElementById('userName').textContent = userName;
+        }else
+        {
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('saveButton').addEventListener('click', saveUserInfo);
+    });
+</script>
+</body>
+</html>

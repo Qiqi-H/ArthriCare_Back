@@ -77,7 +77,6 @@
     // 使用 JavaScript 监听表单提交事件，并发送登录请求到后端
     document.getElementById('loginForm').addEventListener('submit', function(event) {
         event.preventDefault(); // 阻止表单默认提交行为
-        //location.href = 'medication.html';
         var email = document.getElementById('email').value;
         var password = document.getElementById('password').value;
 
@@ -90,25 +89,26 @@
             },
             body: JSON.stringify({ email: email, password: password })
         })
-            .then(response => response.json())
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Login failed. Please check your email and password.');
+                }
+            })
             .then(data => {
                 console.log(data);
 
-                // 检查登录是否成功，可以根据实际需求进行逻辑判断
-                if (data.id != null) {
-                    // 登录成功，将用户信息保存到 sessionStorage
-                    sessionStorage.setItem('loggedInUser', JSON.stringify(data));
+                // 登录成功，将用户信息保存到 sessionStorage
+                sessionStorage.setItem('loggedInUser', JSON.stringify(data));
 
-                    // 重定向到 medication.html
-                    location.href = 'userInfor.html';
-                } else {
-                    // 登录失败，显示错误信息
-                    //console.log(data.message);
-                }
+                // 重定向到 userInfor.html
+                location.href = 'homePage.html';
             })
             .catch(error => {
                 // 处理错误
                 console.error(error);
+                alert(error.message); // 显示错误消息
             });
     });
 

@@ -8,6 +8,9 @@ public interface UserMapper {
     @Select("SELECT * from users where email = #{email} and password = #{password}")
     User findUser(@Param("email") String email, @Param("password") String password);
 
+    @Select("SELECT point from users where id = #{id}")
+    int findUserScoreById(Long id);
+
     @Select("SELECT * from users where email = #{email}")
     User findUserByEmail(@Param("email") String email);
 
@@ -19,10 +22,18 @@ public interface UserMapper {
             "(#{user.name}, #{user.age}, #{user.gender}, #{user.weight}, #{user.email}, #{user.password})")
     void createUser(@Param("user") User user);
 
+
     @Select("SELECT password from users where email = #{email}")
     String getUserPassword(@Param("email")String email);
 
 
     @Update("UPDATE users SET password = #{newPassword} WHERE id = #{id}")
     void resetPassword(@Param("newPassword")String newPassword,@Param("id") Long id);
+
+    @Update("UPDATE users SET point = point + #{newPoint} WHERE id = #{id}")
+    void addPointsToUser(@Param("newPoint") int newPoint, @Param("id") Long id);
+
+    @Update("UPDATE users SET name = #{name}, gender = #{gender}, weight = #{weight}, age = #{age}, email = #{email} WHERE id = #{id}")
+    void updateUserInformation(User user);
+
 }

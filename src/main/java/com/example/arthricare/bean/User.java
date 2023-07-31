@@ -2,6 +2,7 @@ package com.example.arthricare.bean;
 
 import java.math.BigDecimal;
 
+
 public class User {
     private Long id;
     private String name;
@@ -10,6 +11,7 @@ public class User {
     private BigDecimal weight;
     private String email;
     private String password;
+    private int point;
 
     // 默认构造函数
     public User() {}
@@ -21,6 +23,7 @@ public class User {
         this.weight = weight;
         this.email = email;
         this.password = password;
+        point = 0;
     }
     // Getter 和 Setter 方法
     public Long getId() {
@@ -79,6 +82,13 @@ public class User {
         this.password = password;
     }
 
+    public int getPoint() {
+        return point;
+    }
+    public void setPoint(int point) {
+        this.point = this.point+point;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -89,6 +99,7 @@ public class User {
                 ", weight=" + weight +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
+                ", point='" + point + '\'' +
                 '}';
     }
 }

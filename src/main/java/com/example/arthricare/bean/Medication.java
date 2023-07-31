@@ -4,35 +4,39 @@ package com.example.arthricare.bean;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.sql.Date;
 
 public class Medication {
 
-    private Integer id;
-    private Integer userId;
+    private long medicationId;
+    private long userId;
     private String medicationType;
     private String medicationName;
     private String medicationCategory;
     private String frequency;
     private double dosageUnit;
-    @JsonFormat(pattern = "yyyy-MM-dd")
+
     private Date startDate;
-    @JsonFormat(pattern = "yyyy-MM-dd")
+
     private Date endDate;
 
     private String note;
+
+    private String reminderTimes;
+
+    private boolean medicationExpiration;
     public Medication() {
     }
 
-    public Integer getId() {
-        return id;
+    public long getMedicationId() {
+        return medicationId;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setMedicationId(Integer id) {
+        this.medicationId = id;
     }
 
-    public Integer getUserId() {
+    public long getUserId() {
         return userId;
     }
 
@@ -104,10 +108,26 @@ public class Medication {
         this.note = note;
     }
 
+    public String getReminderTimes() {
+        return reminderTimes;
+    }
+
+    public void setReminderTimes(String reminderTimes) {
+        this.reminderTimes = reminderTimes;
+    }
+
+    public boolean isMedicationExpiration() {
+        return medicationExpiration;
+    }
+
+    public void setMedicationExpiration(boolean medicationExpiration) {
+        this.medicationExpiration = medicationExpiration;
+    }
+
     @Override
     public String toString() {
         return "Medication{" +
-                "id=" + id +
+                "medicationId=" + medicationId +
                 ", userId=" + userId +
                 ", medicationType='" + medicationType + '\'' +
                 ", medicationName='" + medicationName + '\'' +
@@ -116,6 +136,9 @@ public class Medication {
                 ", dosageUnit=" + dosageUnit +
                 ", startDate=" + startDate +
                 ", endDate=" + endDate +
+                ", note='" + note + '\'' +
+                ", reminderTimes='" + reminderTimes + '\'' +
+                ", medicationExpiration=" + medicationExpiration +
                 '}';
     }
 }

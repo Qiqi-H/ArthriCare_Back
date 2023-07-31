@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>homePage</title>
+  <style>
+    /* Styles for the custom dialog */
+    #timeDialog {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 20px;
+      border: 1px solid #ccc;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      z-index: 9999;
+    }
+
+    #timeDialog button {
+      margin-right: 10px;
+    }
+  </style>
+</head>
+
+<body>
+<div>Hello, <span id="userName"></span></div>
+<label for="datePicker">Choose Date:</label>
+<input type="date" id="datePicker">
+<p>
+  <button onclick="window.location.href='addMedication.html';">Add Medication</button>
+  <button onclick="window.location.href='myMedPage.html';">My Medication</button>
+  <button onclick="window.location.href='myRewardPage.html';">My Rewards</button>
+  <button onclick="window.location.href='myProfilePage.html';">My Profile</button>
+</p>
+
+<script>
+
+  function setDefaultDate() {
+    // Check if the selectedDateTime is present in sessionStorage
+    const selectedDateTime = sessionStorage.getItem('selectedDateTime');
+
+    // Get the current date
+    var currentDate;
+    if (selectedDateTime) {
+      // If selectedDateTime exists, use its value
+      currentDate = new Date(selectedDateTime);
+      sessionStorage.removeItem('selectedDateTime');
+    } else {
+      // Otherwise, use the current date
+      currentDate = new Date();}
+      //console.log(currentDate)
+      // 获取年份、月份和日期
+      var year = currentDate.getFullYear();
+      var month = String(currentDate.getMonth() + 1).padStart(2, '0'); // 补零
+      var day = String(currentDate.getDate()).padStart(2, '0'); // 补零
+
+      // 组合成"YYYY-MM-DD"格式的字符串
+      var formattedDate = year + "-" + month + "-" + day;
+      // 设置日期选择器的默认值为今天
+      document.getElementById('datePicker').value = formattedDate;
+  }
+
+
+
+  // Function to handle date picker changes
+  function handleDateChange() {
+    const loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
+    if (loggedInUser) {
+      // Check if the 'name' property is not empty in the loggedInUser object
+      const userName = loggedInUser.name.trim() !== '' ? loggedInUser.name : 'guest';
+      // Set the greeting message with the user's name or 'guest' if it's empty
+      document.getElementById('userName').textContent = userName;
+
+      const selectedDate = document.getElementById('datePicker').value;
+      const userId = loggedInUser.id;
+      //console.log(selectedDate)
+      const data = {
+        userId: userId,
+        chooseDate: selectedDate
+      };
+
+      fetch('/medications/findMedicationByUserIdAndDate', {
+        method: 'POST', // 根据实际情况选择请求方法
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+              .then(response => {
+                // 处理后端响应
+                if (response.ok) {
+                  return response.json();
+                } else {
+                  throw new Error('Network response was not ok');
+                }
+              })
+              .then(data => {
+                // 处理后端返回的数据
+                //console.log(data);
+                const groupedMedications = groupMedicationsByTime(data); // 对药物信息按时间分组
+                displayMedications(groupedMedications); // 调用显示药物信息的函数
+              })
+              .catch(error => {
+                // 处理错误
+                console.error('Error:', error);
+              });
+    } else {
+      window.location.href = 'index.html';
+    }
+  }
+
+  // Function to group medications by time
+  function groupMedicationsByTime(medications) {
+    const groupedMedications = {};
+    medications.forEach(med => {
+      if (!groupedMedications[med.reminderTime]) {
+        groupedMedications[med.reminderTime] = [];
+      }
+      groupedMedications[med.reminderTime].push(med);
+    });
+    return groupedMedications;
+  }
+
+  // Function to display medications data
+  function displayMedications(groupedMedications) {
+    // 获取用于显示药物信息的容器元素
+    const medicationsContainer = document.getElementById('medicationsContainer');
+    medicationsContainer.innerHTML = ''; // 清空容器内容
+
+    // 遍历按时间分组的药物信息，并动态生成HTML显示每个时间点的药物列表
+    for (const time in groupedMedications) {
+      const medsAtTime = groupedMedications[time];
+      const timeElement = document.createElement('div');
+      timeElement.innerHTML = `<h2>Time: ${time}</h2>`;
+      medicationsContainer.appendChild(timeElement);
+
+      medsAtTime.forEach(med => {
+        const medElement = document.createElement('div');
+        medElement.innerHTML = `
+        <h3>Medication Name: ${med.medicationName}</h3>
+        <p>Dosage: ${med.dosageUnit} ${med.category}</p>
+      `;
+
+        // Check if alreadyTakeMedication is true before displaying takeMedTime
+        if (med.alreadyTakeMedication) {
+          const takeMedTime = new Date(med.takeMedTime)
+          const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+          const month = monthNames[takeMedTime.getMonth()]; // getMonth() 返回的是0-11，所以我们需要 +1 来得到正确的月份
+          const day = takeMedTime.getDate();
+
+          const hours = takeMedTime.getHours();
+          const minutes = takeMedTime.getMinutes();
+          const seconds = takeMedTime.getSeconds();
+
+// 你可以根据你的需求来改变以下的格式
+          const formattedDate = `${hours}:${minutes}, ${month} ${day}`;
+          medElement.innerHTML += `<p>Take Medication Time: ${formattedDate}</p>`;
+        }
+
+        medicationsContainer.appendChild(medElement);
+
+        const takeMedicationButton = document.createElement('button');
+        takeMedicationButton.textContent = 'Take Medication';
+        takeMedicationButton.setAttribute('data-reminder-id', med.reminderId);
+        takeMedicationButton.setAttribute('data-reminder-time', med.reminderTime)
+        // 添加按钮点击事件处理程序
+        takeMedicationButton.addEventListener('click', openTimeSelectionDialog);
+        // 将按钮添加到页面
+        medicationsContainer.appendChild(takeMedicationButton);
+
+        //if (med.alreadyTakeMedication){takeMedicationButton.disabled = true}
+
+        const horizontalLine = document.createElement('hr');
+        medicationsContainer.appendChild(horizontalLine);
+      });
+    }
+  }
+
+  // Function to handle the time selection dialog
+  function openTimeSelectionDialog(event) {
+    const dialogContainer = document.createElement('div');
+    dialogContainer.id = 'timeDialog';
+
+    const reminderId = event.target.getAttribute('data-reminder-id');
+    const reminderTime = event.target.getAttribute('data-reminder-time')
+    // Create the buttons and add them to the dialog
+    const onTimeButton = document.createElement('button');
+    onTimeButton.textContent = 'Now';
+    onTimeButton.addEventListener('click', () => {
+      const currentDate = new Date();
+
+      console.log(currentDate)
+      takeMedication(currentDate,reminderId)
+      closeTimeSelectionDialog();
+    });
+    dialogContainer.appendChild(onTimeButton);
+
+    const setTimeButton = document.createElement('button');
+    setTimeButton.textContent = 'On time';
+    setTimeButton.addEventListener('click', () => {
+      const currentDate = new Date()
+      const [hours, minutes, seconds] = reminderTime.split(':').map(Number);
+      currentDate.setHours(hours, minutes, seconds, 0);
+      console.log(currentDate)
+      takeMedication(currentDate,reminderId)
+      closeTimeSelectionDialog();
+    });
+    dialogContainer.appendChild(setTimeButton);
+
+    const nowButton = document.createElement('button');
+    nowButton.textContent = 'Set Time';
+    nowButton.addEventListener('click', () => {
+      // Create a date and time picker input element
+      const dateTimePicker = document.createElement('input');
+      dateTimePicker.type = 'datetime-local';
+
+      // Set the default value to the current time
+      var currentDate = new Date();
+
+// 获取年份、月份和日期
+      var year = currentDate.getFullYear();
+      var month = String(currentDate.getMonth() + 1).padStart(2, '0'); // 补零
+      var day = String(currentDate.getDate()).padStart(2, '0'); // 补零
+      var hours = String(currentDate.getHours()).padStart(2, '0'); // 补零
+      var minutes = String(currentDate.getMinutes()).padStart(2, '0'); // 补零
+
+// 组合成"YYYY-MM-DD HH:mm:ss"格式的字符串
+      var formattedDate = year + "-" + month + "-" + day + " " + hours + ":" + minutes;
+      dateTimePicker.value = formattedDate;
+
+      // Add a "Confirm" button to allow the user to select the time
+      const confirmButton = document.createElement('button');
+      confirmButton.textContent = 'Confirm';
+      confirmButton.addEventListener('click', () => {
+        const selectedDateTime = new Date(dateTimePicker.value);
+        console.log(selectedDateTime);
+        takeMedication(selectedDateTime, reminderId);
+        closeTimeSelectionDialog();
+      });
+
+      // Add the date and time picker and confirm button to the dialog
+      dialogContainer.appendChild(dateTimePicker);
+      dialogContainer.appendChild(confirmButton);
+    });
+
+    dialogContainer.appendChild(nowButton);
+
+    // Add the dialog to the page
+    document.body.appendChild(dialogContainer);
+  }
+
+  // Function to close the time selection dialog
+  function closeTimeSelectionDialog() {
+    const dialogContainer = document.getElementById('timeDialog');
+    if (dialogContainer) {
+      document.body.removeChild(dialogContainer);
+    }
+
+    sessionStorage.setItem('selectedDateTime', document.getElementById('datePicker').value);
+    location.reload();
+  }
+
+  function takeMedication(date,reminderId) {
+    const data = {
+      reminderId: reminderId,
+      takeMedTime: date
+    };
+
+    fetch('reminders/takeMedication', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    }).catch(error => {
+      console.error('Error:', error);
+    });
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+
+    setDefaultDate();
+    // Call the function when the page loads
+    handleDateChange();
+
+    // 添加事件监听器，当日期选择器的值改变时触发
+    document.getElementById('datePicker').addEventListener('change', handleDateChange);
+  });
+
+
+</script>
+
+<!-- 用于显示药物信息的容器 -->
+<div id="medicationsContainer"></div>
+
+</body>
+
+</html>

@@ -67,4 +67,12 @@ public class UserController {
         return ResponseEntity.ok("update successfully");
     }
 
+
+    @PutMapping("/updateUserInformation")
+    public ResponseEntity<User> updateUserInformation(@RequestBody User user)
+    {
+        userService.UpdateUserInformation(user);
+        return ResponseEntity.ok(userQueryService.getUserById(user.getId()));
+    }
+
 }

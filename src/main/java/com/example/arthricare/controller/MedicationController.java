@@ -1,12 +1,16 @@
 package com.example.arthricare.controller;
 
 import com.example.arthricare.bean.Medication;
+import com.example.arthricare.bean.valueObject.HomePageData;
+import com.example.arthricare.bean.valueObject.HomePageMedData;
 import com.example.arthricare.service.MedicationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -30,9 +34,8 @@ public class MedicationController {
         }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Void> updateMedication(@PathVariable("id") Integer id, @RequestBody Medication medication) {
-        medication.setId(id);
+    @PutMapping("/updateMedication")
+    public ResponseEntity<Void> updateMedication(@RequestBody Medication medication) {
         medicationService.updateMedication(medication);
         return ResponseEntity.ok().build();
     }
@@ -64,13 +67,35 @@ public class MedicationController {
         List<Medication> medications = medicationService.findMedicationByUserId(userId);
         //Medication m = medications.get(0);
         if (!medications.isEmpty()) {
-            System.out.println(medications);
+            //System.out.println(medications);
             return ResponseEntity.ok(medications);
         } else {
             return ResponseEntity.notFound().build();
         }
     }
 
+
+    @PostMapping("/findMedicationByUserIdAndDate")
+    public ResponseEntity<List<HomePageMedData>> findMedicationByUserIdAndDate(@RequestBody HomePageData homePageData) {
+
+        return ResponseEntity.ok(medicationService.findMedicationByUserIdAndDate(homePageData));
+    }
+
+
+
+    @GetMapping("checkMedicationExpiration/{medicationId}")
+    public ResponseEntity<Boolean> checkMedicationExpiration(@PathVariable("medicationId") Long medicationId) {
+        if (medicationService.checkMedicationExpiration(medicationId))
+        {
+            medicationService.updateMedicationExpirationStatues(medicationId,true);
+            return  ResponseEntity.ok(true);
+        }
+        else
+        {
+            medicationService.updateMedicationExpirationStatues(medicationId,false);
+            return  ResponseEntity.ok(false);
+        }
+    }
     //https://www.runoob.com/w3cnote/javascript-autocomplete.html
     //qu dou dong
     //https://medium.com/@milosbiljanovic/springboot-autocomplete-with-elasticsearch-11ea95d58854
