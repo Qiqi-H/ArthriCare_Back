@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dynamic Button Creation</title>
+</head>
+<body>
+<div id="buttonContainer">
+  <!-- Your dynamically created buttons will be added here -->
+</div>
+
+<script>
+  // Function to create a new button and add it to the container
+  function createButton() {
+    var buttonContainer = document.getElementById("buttonContainer");
+
+    // Create a new button element
+    var button = document.createElement("button");
+    button.innerHTML = "Dynamic Button"; // Set the button text
+
+    // Generate a unique id for the button (e.g., "button1", "button2", etc.)
+    var buttonId = "button" + (buttonContainer.children.length + 1);
+    button.setAttribute("id", buttonId);
+
+    // Append the button to the container
+    buttonContainer.appendChild(button);
+
+    return button; // Return the created button
+  }
+
+  // Function to handle the click event for the dynamically created buttons
+  function handleButtonClick(event) {
+    var buttonId = event.target.id;
+    alert("You clicked " + buttonId);
+  }
+
+  // Wait for the DOM content to be loaded
+  document.addEventListener("DOMContentLoaded", function() {
+    var buttonContainer = document.getElementById("buttonContainer");
+
+    // Create and add a new button to the container
+    var button1 = createButton();
+
+    // Create and add another button to the container
+    var button2 = createButton();
+
+    // Add click event listeners to the dynamically created buttons
+    button1.addEventListener("click", handleButtonClick);
+    button2.addEventListener("click", handleButtonClick);
+
+    // You can add more buttons and event listeners as needed.
+  });
+</script>
+</body>
+</html>
+
+
+
+
+

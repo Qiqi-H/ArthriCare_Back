@@ -7,9 +7,14 @@
 <h1>User Information Page</h1>
 
 <div id="userInfo"></div>
+<div id="userScore"></div>
+<!-- 使用 <progress> 元素作为进度条 -->
+<progress id="progressBar" value="0" max="100"></progress>
 <div id="medicationContainer"></div>
-<button onclick="window.location.href='autoSuggest.html';">add Medication</button>
-<button onclick="window.location.href='resetPassword.html';">reset Password</button>
+<button onclick="window.location.href='autoSuggest.html';">Add Medication</button>
+<button onclick="window.location.href='resetPassword.html';">Reset Password</button>
+<button onclick="window.location.href='task.html';">EveryDay Task</button>
+<button onclick="window.location.href='homePage.html';">HomePage</button>
 
 <script>
     // JavaScript 代码
@@ -26,21 +31,96 @@
                 var medicationContainer = document.getElementById('medicationContainer');
                 medicationContainer.innerHTML = '';
 
-                //console.log(medications);
                 // 遍历药物列表，生成每个药物的信息
                 medications.forEach(function (medication) {
                     console.log(medication);
                     var medicationElement = document.createElement('div');
-                    medicationElement.textContent = 'Medication Name: ' + medication.medicationName + ', Start Date: ' + new Date(medication.startDate).toDateString();
+                    medicationElement.textContent = 'Medication Name: ' + medication.medicationName;
 
-                    // 如果note存在，则添加到文本内容中
-                    if (medication.note!=null) {
-                        medicationElement.textContent += ', Note: ' + medication.note;
-                    }
 
-                    // 将展示元素添加到容器中
-                    medicationContainer.appendChild(medicationElement);
+                    fetch('/reminders/findNextReminderTime/' + medication.medicationId)
+                        .then(response => {
+                            if (response.ok) {
+                                return response.json();
+                            }
+                            else if(response.status === 404)
+                            {
+                                return "reminder have not created yet";
+                            }else {
+                                return "An error occurred";
+                            }
+                        })
+                        .then(function (nextReminder) {
+                            medicationElement.textContent += ', '+'Next Reminder Time: ' + nextReminder;
+
+                            if (medication.note != null) {
+                                medicationElement.textContent += ', Note: ' + medication.note;
+                            }
+
+                            var takeMedicationButton = document.createElement('button');
+                            takeMedicationButton.textContent = 'Take Medication';
+
+                            takeMedicationButton.onclick = function() {
+                                if(canTakeMedication(nextReminder))
+                                {
+                                    if(canTakeMedicationReward(nextReminder))
+                                    {
+                                        fetch('/rewards/claimTakeMedicationReward/' + loggedInUser.id)
+                                            .then(response =>  {
+                                                if (response.ok)
+                                                {
+                                                    alert("Configuration, you get 100 point ")
+                                                }
+                                            })
+                                            .catch(error => {
+                                                alert('Error get point');
+                                            });
+                                    }
+                                    else
+                                    {
+                                        fetch('/rewards/claimTakeMedicationWithoutReward/' + loggedInUser.id)
+                                            .then(response =>  {
+                                                if (response.ok)
+                                                {
+                                                    alert("you should take medication on time next time ")
+                                                }
+                                            })
+                                            .catch(error => {
+                                                alert('Error get point');
+                                            });
+                                    }
+                                }
+
+                            };
+                            medicationElement.appendChild(takeMedicationButton);
+
+                            // 将展示元素添加到容器中
+                            medicationContainer.appendChild(medicationElement);
+                        })
+                        .catch(error => {
+                            console.log('Error fetching next reminder time:', error);
+                            medicationElement.textContent += ', Error fetching next reminder time.';
+                        });
+
                 });
+            })
+            .catch(error => {
+                console.log('Error fetching user information:', error);
+            });
+
+        fetch('/rewards/findPointByUserId/' + loggedInUser.id)
+            .then(response => response.json()) // This will parse the response as JSON
+            .then(function(point) {
+                // 显示用户的分数和等级
+                var userScoreElement = document.getElementById('userScore');
+                var userScore = point;
+                var userLevel = Math.floor(userScore / 100);
+                userScoreElement.textContent = 'Score: ' + userScore + ', Level: ' + userLevel;
+
+                // 计算分数和100的比值，更新进度条的值
+                var progressBar = document.getElementById('progressBar');
+                var remainder = userScore % 100;
+                progressBar.value = remainder;
             })
             .catch(error => {
                 console.log('Error fetching user information:', error);
@@ -49,7 +129,45 @@
         // 如果用户未登录，可以根据需求进行逻辑处理，如跳转到登录页面
         window.location.href = 'index.html';
     }
+
+    function canTakeMedication(nextReminderTimeString)
+    {
+        var currentTime = new Date();
+        var fiveMinutesInMillis = 5 * 60 * 1000;
+
+        if (nextReminderTimeString === "reminder have not created yet") {
+            // Conversion failed, nextReminder is not a valid time string
+            return false;
+        }else
+        {
+            return true;
+        }
+    }
+
+
+    function canTakeMedicationReward(nextReminderTimeString) {
+        const [hours, minutes, seconds] = nextReminderTimeString.split(':').map(Number);
+
+        // Create a new Date object with the same date as the current date and the parsed time
+        const nextReminderTime = new Date();
+        nextReminderTime.setHours(hours);
+        nextReminderTime.setMinutes(minutes);
+        nextReminderTime.setSeconds(seconds);
+
+        var fiveMinutesBeforeCurrentTime = new Date(currentTime.getTime() - fiveMinutesInMillis);
+        var fiveMinutesAfterCurrentTime = new Date(currentTime.getTime() + fiveMinutesInMillis);
+
+        if (nextReminderTime >= fiveMinutesBeforeCurrentTime && nextReminderTime <= fiveMinutesAfterCurrentTime) {
+            // The nextReminder time is within 5 minutes before or after the current time
+            console.log('can take reward');
+            return true;
+        } else {
+            // The nextReminder time is outside the 5-minute range
+            //Reminder should have Date System!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            return false;
+        }
+
+    }
 </script>
 </body>
 </html>
-

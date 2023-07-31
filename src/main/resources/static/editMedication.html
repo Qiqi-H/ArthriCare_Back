@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Medication</title>
+</head>
+<body>
+<h1>Edit Medication</h1>
+
+<form id="editMedicationForm">
+    <div>
+        <label for="medicationName">Medication Name:</label>
+        <input type="text" id="medicationName" required>
+    </div>
+    <div>
+        <label for="medicationCategory">Medication Category:</label>
+        <select id="medicationCategory" required>
+            <option value="table">Table</option>
+            <option value="pill">Pill</option>
+            <option value="injection">Injection</option>
+            <option value="drop">Drop</option>
+        </select>
+    </div>
+    <div>
+        <label for="frequency">Frequency:</label>
+        <select id="frequency" required>
+            <option value="once">Once a day</option>
+            <option value="twice">Twice a day</option>
+            <option value="thrice">Three times a day</option>
+        </select>
+    </div>
+    <div id="timePickersContainer">
+        <!-- Time pickers will be dynamically added here -->
+    </div>
+    <div>
+        <label for="dosageUnit">Dosage Unit:</label>
+        <select id="dosageUnit" required>
+            <option value="0.5">0.5</option>
+            <option value="1.0">1.0</option>
+            <option value="1.5">1.5</option>
+            <option value="2.0">2.0</option>
+            <option value="2.5">2.5</option>
+            <!-- Add more options as needed -->
+        </select>
+    </div>
+    <div>
+        <label for="startDay">Start Day:</label>
+        <input type="date" id="startDay" required>
+    </div>
+    <div>
+        <label for="endDay">End Day:</label>
+        <input type="date" id="endDay" required>
+    </div>
+    <div>
+        <label for="note">Note:</label>
+    </div>
+    <div>
+        <textarea id="note" rows="4"></textarea>
+    </div>
+    <button type="submit">Update Medication</button>
+    <div id="response"></div>
+</form>
+
+<script>
+    // Retrieve the medicationId from session storage
+    const medicationId = sessionStorage.getItem('medicationId');
+
+    // Function to populate form with medication details for editing
+    function populateFormWithMedicationDetails(medicationDetails) {
+        var dosageUnit = parseFloat(medicationDetails.dosageUnit);
+        if (!(dosageUnit % 1 !== 0)) {
+            dosageUnit = dosageUnit.toFixed(1);
+        }
+
+        document.getElementById("medicationName").value = medicationDetails.medicationName;
+        document.getElementById("medicationCategory").value = medicationDetails.medicationCategory;
+        document.getElementById("frequency").value = medicationDetails.frequency;
+        document.getElementById("dosageUnit").value = dosageUnit;
+        document.getElementById("startDay").value = medicationDetails.startDate;
+        document.getElementById("endDay").value = medicationDetails.endDate;
+        document.getElementById("note").value = medicationDetails.note;
+
+        console.log(medicationDetails)
+
+        generateTimePickers(getFrequencyPickerCount(medicationDetails.frequency));
+    }
+
+    function generateTimePickers(numTimes) {
+        var container = document.getElementById("timePickersContainer");
+        container.innerHTML = ''; // Clear existing time pickers (if any)
+
+        for (var i = 1; i <= numTimes; i++) {
+            var timePicker = document.createElement('input');
+            timePicker.type = "time";
+            timePicker.name = "reminderTime" + i;
+            timePicker.required = true;
+
+            getReminderTime(timePicker,i-1)
+
+            container.appendChild(timePicker);
+        }
+    }
+
+    function getReminderTime(timePicker,index) {
+        fetch(`/reminders/findUniqueReminderTimeByMedicationId/${medicationId}`)
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error("Failed to fetch medication details.");
+                }
+            })
+            .then(timeList => {
+                console.log(timeList[index]);
+                // 继续在这里处理时间列表的逻辑，比如将时间添加到页面上等
+                timePicker.value = timeList[index];
+            })
+            .catch(error => {
+                console.error(error);
+                document.getElementById("response").innerText = "An error occurred while fetching medication details.";
+            });
+    }
+
+
+
+    function getFrequencyPickerCount(frequency) {
+        switch (frequency) {
+            case "once":
+                return 1;
+            case "twice":
+                return 2;
+            case "thrice":
+                return 3;
+            // Add more cases as needed for other frequency options
+            default:
+                return 1; // Default to 1 time picker if frequency is not recognized
+        }
+    }
+
+
+
+
+    // Function to fetch medication details and populate the form
+    function fetchMedicationDetailsAndPopulateForm() {
+        fetch(`/medications/${medicationId}`)
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error("Failed to fetch medication details.");
+                }
+            })
+            .then(data => {
+                populateFormWithMedicationDetails(data);
+            })
+            .catch(error => {
+                console.error(error);
+                document.getElementById("response").innerText = "An error occurred while fetching medication details.";
+            });
+    }
+
+    // Event listener for the form submission
+    document.getElementById("editMedicationForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        var loggedInUser = sessionStorage.getItem('loggedInUser');
+        if (loggedInUser) {
+            loggedInUser = JSON.parse(loggedInUser);
+        } else {
+            // 如果用户未登录，可以根据需求进行逻辑处理，如跳转到登录页面
+            window.location.href = 'index.html';
+        }
+
+        // Get updated values from the form fields
+        var medicationName = document.getElementById("medicationName").value;
+        var medicationCategory = document.getElementById("medicationCategory").value;
+        var frequency = document.getElementById("frequency").value;
+        var dosageUnit = document.getElementById("dosageUnit").value;
+        var startDate = document.getElementById("startDay").value;
+        var endDate = document.getElementById("endDay").value;
+        var note = document.getElementById("note").value;
+
+        var reminderTimes = [];
+        var timePickers = document.querySelectorAll("input[type='time']");
+        timePickers.forEach(function(timePicker) {
+            reminderTimes.push(timePicker.value);
+        });
+
+        var updatedMedication = {
+            userId:loggedInUser.id,
+            medicationId:medicationId,
+            medicationName: medicationName,
+            medicationCategory: medicationCategory,
+            frequency: frequency,
+            dosageUnit: dosageUnit,
+            startDate: startDate,
+            endDate: endDate,
+            note: note,
+            reminderTimes: JSON.stringify(reminderTimes)
+        };
+
+        // Make a PUT request to update the medication
+        fetch(`/medications/updateMedication`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(updatedMedication)
+        })
+            .then(response => {
+                if (response.ok) {
+                    sessionStorage.removeItem('medicationId');
+                    window.location.href = 'homePage.html'; // Redirect to home page after successful update
+                } else {
+                    document.getElementById("response").innerText = "Failed to update medication.";
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                document.getElementById("response").innerText = "An error occurred while updating medication.";
+            });
+    });
+
+    // Call the function to fetch medication details and populate the form
+    fetchMedicationDetailsAndPopulateForm();
+</script>
+</body>
+</html>
