@@ -1,13 +1,11 @@
 package com.example.arthricare.service;
 
-
 import com.example.arthricare.bean.User;
 import com.example.arthricare.mapper.RewardMapper;
 import com.example.arthricare.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.Console;
 import java.util.Objects;
 
 @Service
@@ -75,6 +73,17 @@ public class UserService {
     public void resetPassword(String newPassword,Long id)
     {
         userMapper.resetPassword(newPassword,id);
+    }
+
+
+    // test for reset page
+    public void resetPasswordtest(String newPassword, String email) {
+        User user = userMapper.findUserByEmail(email);
+        if (user != null) {
+            userMapper.resetPasswordByEmail(newPassword, email);
+        } else {
+                // maybe do something
+        }
     }
 
     public String UpdateUserInformation(User user)
