@@ -53,7 +53,7 @@ public interface ReminderMapper {
 
 ;
 
-    @Select("SELECT DISTINCT reminder_time from reminders WHERE medication_id = #{medication_id}")
+    @Select("SELECT DISTINCT reminder_time from reminders WHERE medication_id = #{medication_id} ORDER BY reminder_time;")
     List<Time>findUniqueReminderTimeByMedicationId(long medication_id);
 
     @Delete("Delete from reminders WHERE medication_id = #{medication_id}")
