@@ -4,9 +4,9 @@ import java.sql.Date;
 
 public class HomePageData {
 
-    private long userId;
+    private int userId;
 
-    private long reminderId;
+    private int reminderId;
 
     private java.util.Date takeMedTime;
 
@@ -15,11 +15,11 @@ public class HomePageData {
     public HomePageData() {
     }
 
-    public long getUserId() {
+    public int getUserId() {
         return userId;
     }
 
-    public void setUserId(long userId) {
+    public void setUserId(int userId) {
         this.userId = userId;
     }
 
@@ -31,11 +31,11 @@ public class HomePageData {
         this.chooseDate = chooseDate;
     }
 
-    public long getReminderId() {
+    public int getReminderId() {
         return reminderId;
     }
 
-    public void setReminderId(long reminderId) {
+    public void setReminderId(int reminderId) {
         this.reminderId = reminderId;
     }
 

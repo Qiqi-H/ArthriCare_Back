@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add New Post</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<h1>Add New Post</h1>
+<form id="addPostForm">
+    <label for="title">Title:</label>
+    <input type="text" id="title" name="title" required>
+
+    <label for="content">Content:</label>
+    <textarea id="content" name="content" rows="4" required></textarea>
+
+    <label for="forumSection">Forum Section:</label>
+    <select id="forumSection" name="forumSection" required>
+        <option value="symptoms">Symptoms</option>
+        <option value="treatment">Treatment</option>
+        <option value="lifestyle">Lifestyle</option>
+        <option value="question">Question</option>
+    </select>
+
+    <label for="imageInput">Upload Images (Max 4):</label>
+    <input type="file" id="imageInput" name="images" multiple accept="image/*">
+
+    <div id="imagePreviews"></div>
+
+    <button type="submit">Submit</button>
+</form>
+
+<script>
+    const addPostForm = document.getElementById('addPostForm');
+    const imageInput = document.getElementById('imageInput');
+    const imagePreviews = document.getElementById('imagePreviews');
+
+    imageInput.addEventListener('change', function () {
+        const selectedFiles = imageInput.files;
+        imagePreviews.innerHTML = '';
+
+        for (let file of selectedFiles) {
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.maxWidth = '100px';
+                img.style.height = 'auto';
+                img.style.marginRight = '10px';
+                imagePreviews.appendChild(img);
+            };
+
+            reader.readAsDataURL(file);
+        }
+    });
+
+    addPostForm.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        var loggedInUser = sessionStorage.getItem('loggedInUser');
+        loggedInUser = JSON.parse(loggedInUser);
+        const userId = loggedInUser.userId;
+        const currentTime = new Date();
+
+        var title = document.getElementById("title").value;
+        if (title.length > 50) {
+            alert('Title cannot exceed 50 characters.');
+            return;
+        }
+        var content =  document.getElementById("content").value;
+        if (content.length > 510) {
+            alert('Content cannot exceed 510 characters.');
+            return;
+        }
+        var forumSection = document.getElementById("forumSection").value;
+
+        var hasImage = false;
+        if (imageInput.files.length > 0) {
+            hasImage = true;
+        }
+
+        var postData = {
+            userId:userId,
+            title:title,
+            content:content,
+            createdTime:currentTime,
+            forumSection:forumSection,
+            haveImage:hasImage
+        }
+
+        console.log(postData);
+        const response =  await fetch('/ComityPost/createPost', {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(postData)
+        });
+
+        if (response.ok) {
+            const postId = await response.json();
+            // 如果选择了图片，则上传它们
+            if (hasImage) {
+                await uploadImages(postId);
+            }
+            window.location.href = "CommunityHomePage.html";
+        } else {
+            alert('Failed to create post.');
+        }
+    });
+
+    async function uploadImages(postId) {
+        const selectedFiles = imageInput.files;
+        let allImagesUploaded = true;
+
+        for (let file of selectedFiles) {
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('postId', postId);  // Ensure the postId is sent as a string
+
+            const response = await fetch('/uploadImage/postImage', {
+                method: 'POST',
+                body: formData
+            });
+
+            const responseText = await response.text();
+
+            if (!response.ok || responseText !== "upload successfully") {
+                allImagesUploaded = false;
+                alert('Failed to upload an image: ' + responseText);
+            }
+        }
+
+        imagePreviews.innerHTML = '';
+
+        if (allImagesUploaded) {
+            alert('Post and images uploaded successfully.');
+        } else {
+            alert('Some images failed to upload. Please check and try again.');
+        }
+    }
+</script>
+</body>
+</html>
+
+
+
+
+
+

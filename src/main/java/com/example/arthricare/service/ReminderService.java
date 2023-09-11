@@ -22,7 +22,7 @@ public class ReminderService {
         this.reminderMapper = reminderMapper;
     }
 
-    public void createReminders(String reminderTimesJson, long medicationId, Date startDate, Date endDate) {
+    public void createReminders(String reminderTimesJson, int medicationId, Date startDate, Date endDate) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             // 将JSON字符串解析成数组
@@ -71,7 +71,7 @@ public class ReminderService {
         // 在这里继续处理其他Medication属性，将药物信息插入到数据库等操作
     }
 
-    public void updateReminder(String reminderTimesJson, long medicationId, Date startDate, Date endDate)
+    public void updateReminder(String reminderTimesJson, int medicationId, Date startDate, Date endDate)
     {
         reminderMapper.deleteReminderByMedicationId(medicationId);
         createReminders(reminderTimesJson,medicationId,startDate,endDate);

@@ -4,11 +4,11 @@ import java.math.BigDecimal;
 
 
 public class User {
-    private Long id;
+    private int userId;
     private String name;
     private int age;
     private String gender;
-    private BigDecimal weight;
+    private double weight;
     private String email;
     private String password;
     private int point;
@@ -16,7 +16,7 @@ public class User {
     // 默认构造函数
     public User() {}
     // 带参数的构造函数
-    public User(String name, int age, String gender, BigDecimal weight, String email, String password) {
+    public User(String name, int age, String gender, double weight, String email, String password) {
         this.name = name;
         this.age = age;
         this.gender = gender;
@@ -26,12 +26,14 @@ public class User {
         point = 0;
     }
     // Getter 和 Setter 方法
-    public Long getId() {
-        return id;
+
+
+    public int getUserId() {
+        return userId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     public String getName() {
@@ -58,11 +60,11 @@ public class User {
         this.gender = gender;
     }
 
-    public BigDecimal getWeight() {
+    public double getWeight() {
         return weight;
     }
 
-    public void setWeight(BigDecimal weight) {
+    public void setWeight(double weight) {
         this.weight = weight;
     }
 
@@ -92,7 +94,7 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "id=" + id +
+                "user id=" + userId +
                 ", name='" + name + '\'' +
                 ", age=" + age +
                 ", gender='" + gender + '\'' +

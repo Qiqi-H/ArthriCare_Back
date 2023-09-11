@@ -29,7 +29,7 @@ public class MedicationService {
 
     public void createMedication(Medication medication) {
         medicationMapper.insertMedication(medication);
-        long medicationId = medication.getMedicationId();
+        int medicationId = medication.getMedicationId();
         reminderService.createReminders(medication.getReminderTimes(),medicationId,medication.getStartDate(),medication.getEndDate());
         userMapper.addPointsToUser(150,medication.getUserId());
     }
@@ -39,11 +39,11 @@ public class MedicationService {
         reminderService.updateReminder(medication.getReminderTimes(),medication.getMedicationId(),medication.getStartDate(),medication.getEndDate());
     }
 
-    public void deleteMedication(Integer id) {
+    public void deleteMedication(int id) {
         medicationMapper.deleteMedication(id);
     }
 
-    public Medication getMedicationById(long id) {
+    public Medication getMedicationById(int id) {
         return medicationMapper.findById(id);
     }
 
@@ -59,7 +59,7 @@ public class MedicationService {
 
     public List<HomePageMedData> findMedicationByUserIdAndDate(HomePageData homePageData)
     {
-        long userId = homePageData.getUserId();
+        int userId = homePageData.getUserId();
         Date chooseDate = homePageData.getChooseDate();
         List<Long> reminderIdList = medicationMapper.findReminderIdsByUserIdAndDate(userId,chooseDate);
         List<HomePageMedData> homePageMedDataList = new ArrayList<>();
@@ -81,12 +81,12 @@ public class MedicationService {
         return homePageMedDataList;
     }
 
-    public void updateMedicationExpirationStatues(long medicationId,boolean state)
+    public void updateMedicationExpirationStatues(int medicationId,boolean state)
     {
         medicationMapper.updateMedicationExpiration(medicationId,state);
     }
 
-    public boolean checkMedicationExpiration(long medicationId)
+    public boolean checkMedicationExpiration(int medicationId)
     {
         if(medicationMapper.findById(medicationId).isMedicationExpiration())
         {

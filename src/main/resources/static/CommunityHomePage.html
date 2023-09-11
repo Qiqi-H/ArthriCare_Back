@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* 样式同上 */
+
+        header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+        }
+
+        .section {
+            display: inline-block;
+            margin: 10px;
+        }
+
+        .post-card {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .post-card h3 {
+            margin: 0;
+        }
+
+        .post-card h4 {
+            margin: 0;
+        }
+
+        .post-card p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <button class="create-post-button">Create Post</button>
+    <button onclick="window.location.href='ComityChatHomePage.html';">Chat</button>
+</header>
+
+<div class="section">
+    <button class="section-button" data-category="Symptoms">Symptoms</button>
+</div>
+
+<div class="section">
+    <button class="section-button" data-category="Treatment">Treatment</button>
+</div>
+
+<div class="section">
+    <button class="section-button" data-category="Lifestyle">Lifestyle</button>
+</div>
+
+<div class="section">
+    <button class="section-button" data-category="News">News</button>
+</div>
+
+<div class="section">
+    <button class="section-button" data-category="Question">Question</button>
+</div>
+
+<div class="post-container">
+    <!-- 这里将显示检索到的帖子 -->
+</div>
+
+<script>
+    var loggedInUser = sessionStorage.getItem('loggedInUser');
+    if (loggedInUser) {
+        loggedInUser = JSON.parse(loggedInUser);
+    } else {
+        // 如果用户未登录，可以根据需求进行逻辑处理，如跳转到登录页面
+        window.location.href = 'index.html';
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const createPostButton = document.querySelector(".create-post-button");
+        const sectionButtons = document.querySelectorAll(".section-button");
+        const postContainer = document.querySelector(".post-container");
+
+        let postsLoaded = -1; // 已加载的帖子数量
+        const postsPerLoad = 10; // 每次加载的帖子数量
+
+        // 加载更多帖子
+        async function loadMorePosts() {
+            const category = document.querySelector(".active-section").getAttribute("data-category");
+            const response = await fetch(`/ComityPost/getPosts?category=${category}&start=${postsLoaded}&count=${postsPerLoad}`);
+            const posts = await response.json();
+
+            if(posts.length!=0)
+            {
+                // 显示加载的帖子
+                for (const post of posts) {
+                    const postCard = document.createElement("div");
+                    postCard.className = "post-card";
+
+                    const userName = document.createElement("h3");
+                    userName.textContent = post.userName; // 假设帖子对象中有 userName 属性
+                    postCard.appendChild(userName);
+
+                    const viewUserProfileButton = document.createElement("button");
+                    viewUserProfileButton.className = "view-button";
+                    viewUserProfileButton.textContent = "View Profile";
+                    viewUserProfileButton.setAttribute("data-user-id", post.userId);
+                    viewUserProfileButton.setAttribute("data-user-name", post.userName);
+                    viewUserProfileButton.addEventListener("click", function() {
+                        const userId = viewUserProfileButton.getAttribute("data-user-id"); // 获取用户ID
+                        const userName = viewUserProfileButton.getAttribute("data-user-name");
+
+                        const userProfileInfo = { // 注意这里是对象字面量，不是 var userProfileInfor
+                            userId: userId,
+                            userName: userName
+                        };
+
+                        sessionStorage.setItem("userProfileInfo", JSON.stringify(userProfileInfo));
+                        // 在此处跳转到用户的主页
+                        window.location.href = "ComityShowProfilePage.html";
+                    });
+                    postCard.appendChild(viewUserProfileButton);
+
+
+                    const title = document.createElement("h4");
+                    title.textContent = post.title; // 假设帖子对象中有 title 属性
+                    postCard.appendChild(title);
+
+                    const content = document.createElement("p");
+                    content.textContent =  post.content.length > 100 ? post.content.substring(0, 100) + "..." : post.content; // 假设帖子对象中有 content 属性
+                    postCard.appendChild(content);
+
+                    if (post.haveImage) {
+                        const imageResponse = await fetch(`/ComityPost/getPostImages?postId=${post.postId}`);
+                        if (imageResponse.ok) {
+                            const imagePaths = await imageResponse.json();
+                            imagePaths.forEach(path => {
+                                const img = document.createElement("img");
+                                img.src = path;
+                                img.style.maxWidth = '150px';
+                                img.style.height = 'auto';
+                                img.style.marginRight = '10px';
+                                postCard.appendChild(img);
+                            });
+                        } else {
+                            console.error('Failed to fetch images for post', post.postId);
+                        }
+                    }
+
+
+                    const viewButton = document.createElement("button");
+                    viewButton.className = "view-button";
+                    viewButton.textContent = "View Post";
+                    viewButton.setAttribute("data-post-id", post.postId);
+                    viewButton.addEventListener("click", function() {
+                        const postId = viewButton.getAttribute("data-post-id"); // 获取帖子ID
+                        sessionStorage.setItem("postId", postId); // 将帖子ID存储在 Session Storage 中
+                        // 在此处跳转到展示完整帖子内容的页面
+                        window.location.href = "ComityShowPostPage.html"
+                    });
+                    postCard.appendChild(viewButton);
+
+                    postContainer.appendChild(postCard);
+                }
+
+                postsLoaded += posts.length;
+            }
+        }
+
+        createPostButton.addEventListener("click", function() {
+            // 在此处添加创建帖子的逻辑
+            window.location.href = "ComityAddPostPage.html";
+        });
+
+        sectionButtons.forEach(button => {
+            button.addEventListener("click", async function() {
+                sectionButtons.forEach(btn => btn.classList.remove("active-section"));
+                button.classList.add("active-section");
+
+                // 清空之前的帖子
+                postContainer.innerHTML = "";
+                postsLoaded = 0;
+
+                await loadMorePosts(); // 加载初始帖子
+            });
+        });
+
+        // 监听滚动事件，当用户快要滑倒底部时加载更多帖子
+        /*
+        window.addEventListener("scroll", function() {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+                console.log("already at bottom")
+                loadMorePosts();
+            }
+        });*/
+
+        // 页面加载时，默认点击 "Symptoms" 按钮以检索初始帖子
+        sectionButtons[0].click();
+    });
+</script>
+</body>
+</html>

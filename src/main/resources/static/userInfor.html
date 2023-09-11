@@ -25,7 +25,7 @@
         document.getElementById('userInfo').innerText = 'Logged in user: ' + loggedInUser.name;
 
         // 发起请求从后端获取用户的药物列表数据
-        fetch('/medications/findMedicationByUserId/' + loggedInUser.id)
+        fetch('/medications/findMedicationByUserId/' + loggedInUser.userId)
             .then(response => response.json()) // This will parse the response as JSON
             .then(function(medications) {
                 var medicationContainer = document.getElementById('medicationContainer');

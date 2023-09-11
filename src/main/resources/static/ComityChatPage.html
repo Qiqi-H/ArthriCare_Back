@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Chat Room</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .chat-container {
+            width: 600px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .chat-box {
+            height: 300px;
+            overflow: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-left: 180px;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 5px;
+            background-color: #f2f2f2;
+            border-radius: 5px;
+        }
+        .input-container {
+            display: flex;
+        }
+        .message-input {
+            flex: 1;
+            padding: 5px;
+        }
+        .send-button {
+            padding: 5px 10px;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+        .online-users {
+            width: 150px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            float: left;
+        }
+        .online-users-header {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .user-list {
+            list-style: none;
+            padding: 0;
+        }
+        .user-list-item {
+            margin-bottom: 5px;
+        }
+        .my-message {
+            text-align: right;
+            color: #007bff;
+        }
+        .other-message {
+            text-align: left;
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+<div class="chat-container">
+    <div class="online-users">
+        <div class="online-users-header">Online Users</div>
+        <ul class="user-list" id="userList"></ul>
+    </div>
+    <div class="chat-box" id="chatBox"></div>
+    <div class="input-container">
+        <input type="text" class="message-input" id="messageInput" placeholder="Enter your message">
+        <button class="send-button" id="sendButton">Send</button>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+        const chatBox = document.getElementById('chatBox');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const userList = document.getElementById('userList');
+
+        let chatPartner = null;
+        const loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
+        const username = loggedInUser.name;
+
+        const socket = new SockJS('/ws');
+        const stompClient = Stomp.over(socket);
+
+        function registerUser() {
+            stompClient.send("/app/register", {}, username);
+        }
+        function fetchOnlineUsers() {
+            fetch('/online-users')
+                .then(response => response.json())
+                .then(users => {
+                    userList.innerHTML = '';
+                    users.forEach(user => {
+                        if (user !== username) {
+                            addUserToUI(user);
+                        }
+                    });
+                });
+        }
+
+        function displayMessage(sender, content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            if (sender === username) {
+                messageDiv.classList.add('my-message');
+                sender = 'me';
+            } else {
+                messageDiv.classList.add('other-message');
+            }
+            messageDiv.textContent = `${sender}: ${content}`;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        sendButton.addEventListener('click', () => {
+
+            const message = messageInput.value;
+            var chatMessage = {
+                from:username,
+                to:chatPartner,
+                content:message,
+                time:new Date()
+            }
+            if (message.trim() !== '' && chatPartner) {
+                stompClient.send("/app/message",{}, JSON.stringify(chatMessage));
+                displayMessage(username, message);
+                messageInput.value = '';
+            }
+        });
+
+        userList.addEventListener('click', event => {
+            const selectedUser = event.target.textContent;
+            chatPartner = selectedUser;
+            //chatBox.innerHTML = '';
+        });
+
+
+        function addUserToUI(username) {
+            // 检查是否已存在相同的用户名
+            const existingUser = document.querySelector(`.user-list-item[data-username="${username}"]`);
+            if (!existingUser) {
+                const li = document.createElement('li');
+                li.textContent = username;
+                li.dataset.username = username; // 添加一个自定义属性来标识用户名
+                userList.appendChild(li);
+            }
+        }
+
+        function removeUserFromUI(username) {
+            const userListItem = document.querySelector(`.user-list-item[data-username="${username}"]`);
+            if (userListItem) {
+                userListItem.remove();
+            }
+        }
+
+        stompClient.connect({}, function(frame) {
+            registerUser();
+            fetchOnlineUsers();
+            stompClient.subscribe(`/chat/contact/${username}`, function(notification) {
+                const content = JSON.parse(notification.body).content;
+                const chatPartner = JSON.parse(notification.body).from;
+                displayMessage(chatPartner, content);
+            });
+            stompClient.subscribe('/chat/newUser', function(user) {
+                addUserToUI(user.body);
+            });
+        });
+    });
+</script>
+</body>
+</html>

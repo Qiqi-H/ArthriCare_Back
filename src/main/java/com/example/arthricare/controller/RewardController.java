@@ -20,14 +20,14 @@ public class RewardController {
     }
 
     @GetMapping("findPointByUserId/{userId}")
-    public ResponseEntity<Integer> getUserById(@PathVariable("userId") Long userId) {
+    public ResponseEntity<Integer> getUserById(@PathVariable("userId") int userId) {
        int point = userRewardService.getPoint(userId);
        return ResponseEntity.ok(point);
 
     }
 
     @GetMapping("checkLoginRewardStatue/{userId}")
-    public ResponseEntity<Boolean> checkLoginRewardStatue(@PathVariable Long userId)
+    public ResponseEntity<Boolean> checkLoginRewardStatue(@PathVariable int userId)
     {
         if(userRewardService.checkLoginRewardClaimedStatue(userId)||userRewardService.determineLoginRewardCanBeClaimed(userId))
         {
@@ -41,13 +41,13 @@ public class RewardController {
     }
 
     @PutMapping("claimLoginReward/{userId}")
-    public void claimLoginReward(@PathVariable Long userId)
+    public void claimLoginReward(@PathVariable int userId)
     {
         userRewardService.claimLoginReward(userId);
     }
 
     @GetMapping("checkProfileRewardStatue/{userId}")
-    public ResponseEntity<Boolean> checkProfileRewardStatue(@PathVariable Long userId)
+    public ResponseEntity<Boolean> checkProfileRewardStatue(@PathVariable int userId)
     {
         if (!userRewardService.checkCompleteProfileStatue(userId))
         {
@@ -60,13 +60,13 @@ public class RewardController {
     }
 
     @PutMapping("claimProfileReward/{userId}")
-    public void claimProfileReward(@PathVariable Long userId)
+    public void claimProfileReward(@PathVariable int userId)
     {
         userRewardService.claimProfileReward(userId);
     }
 
     @PutMapping("claimTakeMedicationReward/{userId}")
-    public void claimTakeMedicationReward(@PathVariable Long userId)
+    public void claimTakeMedicationReward(@PathVariable int userId)
     {
         userRewardService.claimTakeMedicationReward(userId);
     }

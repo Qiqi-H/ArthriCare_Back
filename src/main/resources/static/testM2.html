@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Chat Room</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f2f2f2;
+    }
+    .chat-container {
+      max-width: 100%;
+      padding: 10px;
+      margin: 0 auto;
+    }
+    .return-button {
+      text-align: left;
+      margin-bottom: 10px;
+    }
+    .chat-box {
+      height: 300px;
+      overflow: auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      background-color: white;
+      margin-bottom: 10px;
+    }
+    .input-container {
+      display: flex;
+    }
+    .message-input {
+      flex: 1;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .send-button {
+      padding: 5px 10px;
+      background-color: #007bff;
+      border: none;
+      color: white;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .other-message {
+      text-align: left;
+      color: black;                   /* 文字颜色改为黑色 */
+      border: 1px solid #28a745;     /* 边框颜色 */
+      background-color: #28a745;     /* 背景颜色与边框相同 */
+      padding: 5px;                  /* 内边距 */
+      display: inline-block;         /* 使其成为内联块 */
+      border-radius: 5px;            /* 边框圆角 */
+      margin: 5px 0;                 /* 外边距 */
+      float: left;                   /* 靠左显示 */
+      clear: both;                   /* 清除浮动效果，以便在这个元素后的元素不会被浮动 */
+    }
+
+    .my-message {
+      text-align: right;
+      color: black;                   /* 文字颜色改为黑色 */
+      border: 1px solid #007bff;      /* 边框颜色 */
+      background-color: #007bff;      /* 背景颜色与边框相同 */
+      padding: 5px;                   /* 内边距 */
+      display: inline-block;          /* 使其成为内联块 */
+      border-radius: 5px;             /* 边框圆角 */
+      margin: 5px 0;                  /* 外边距 */
+      float: right;                   /* 靠右显示 */
+      clear: both;                    /* 清除浮动效果 */
+    }
+
+    .chat-partner {
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+<div class="chat-container">
+  <div class="return-button">
+    <button onclick="window.location.href='ComityChatHomePage.html'">Home</button>
+  </div>
+  <div class="chat-partner" id="chatPartner"></div>
+  <div class="chat-box" id="chatBox"></div>
+  <div class="input-container">
+    <input type="text" class="message-input" id="messageInput" placeholder="Enter your message">
+    <button class="send-button" id="sendButton">Send</button>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function(){
+    const chatPartnerElement = document.getElementById('chatPartner');
+    const chatBox = document.getElementById('chatBox');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const socket = new SockJS('/ws');
+    const stompClient = Stomp.over(socket);
+    let chatChannelInfor = JSON.parse(sessionStorage.getItem('chatChannelInfor'));
+
+    if (chatChannelInfor) {
+      const userName = chatChannelInfor.userToId.split('-')[1];
+      chatPartnerElement.textContent = `${userName}`;
+    } else {
+      chatPartnerElement.textContent = "Chatting Partner";
+    }
+    showChatHistories(chatChannelInfor.channelId);
+    function showChatHistories(channelId) {
+      fetch(`/ComityChat/getChatHistory?channelId=${channelId}`)
+              .then(response => {
+                if (response.ok) {
+                  return response.json();
+                } else {
+                  throw new Error('Failed to fetch chat histories');
+                }
+              })
+              .then(chatHistories => {
+                console.log(chatHistories);
+                chatHistories.forEach(history => {
+                  const sender = history.from; // 从历史记录中获取发送者
+                  const content = history.content; // 从历史记录中获取内容
+                  console.log(sender);
+                  displayMessage(sender, content); // 调用 displayMessage 显示消息
+                });
+              })
+              .catch(error => {
+                console.error('Error:', error.message);
+              });
+    }
+    function sendMessage(content) {
+      const chatMessage = {
+        channelId:chatChannelInfor.channelId,
+        from: chatChannelInfor.userFromId, // 使用 userFromId 作为发送者标识
+        to: chatChannelInfor.userToId,
+        content: content,
+        time: new Date()
+      };
+      console.log(chatMessage)
+      stompClient.send("/app/message", {}, JSON.stringify(chatMessage));
+    }
+
+    function displayMessage(sender, content) {
+      const messageDiv = document.createElement('div');
+      messageDiv.classList.add('message');
+      if (sender === chatChannelInfor.userFromId) {
+        messageDiv.classList.add('my-message');
+      } else {
+        messageDiv.classList.add('other-message');
+      }
+
+      messageDiv.textContent = `${content}`;
+      chatBox.appendChild(messageDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function registerUser() {
+      stompClient.send("/app/register", {}, chatChannelInfor.userFromId); // 使用 userFromId 进行注册
+    }
+
+    sendButton.addEventListener('click', () => {
+      const message = messageInput.value.trim();
+      if (message !== '' && chatChannelInfor) {
+        sendMessage(message);
+        displayMessage(chatChannelInfor.userFromId, message);
+        messageInput.value = '';
+      }
+    });
+
+    stompClient.connect({}, function(frame) {
+      registerUser();
+      // 订阅私人消息通道，接收来自聊天伙伴的消息
+      const chatContactPath = `/chat/contact/${chatChannelInfor.userFromId}`; // 使用 userFromId 进行订阅
+      stompClient.subscribe(chatContactPath, function(notification) {
+        const receivedMessage = JSON.parse(notification.body);
+        const content = receivedMessage.content;
+        const sender = receivedMessage.from;
+        displayMessage(sender, content);
+      });
+    });
+    window.addEventListener('beforeunload', function(event) {
+      stompClient.send("/app/leave", {}, chatChannelInfor.userFromId);
+    });
+  });
+</script>
+</body>
+</html>

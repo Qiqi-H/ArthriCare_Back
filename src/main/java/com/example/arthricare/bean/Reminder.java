@@ -5,8 +5,8 @@ import java.sql.Time;
 import java.time.LocalDateTime;
 
 public class Reminder {
-    private long reminderId;
-    private long medicationId;
+    private int reminderId;
+    private int medicationId;
     private Time reminderTime;
     private Date date;
     private boolean alreadyTakeMedication;
@@ -18,11 +18,11 @@ public class Reminder {
     }
 
 
-    public long getMedicationId() {
+    public int getMedicationId() {
         return medicationId;
     }
 
-    public void setMedicationId(long medicationId) {
+    public void setMedicationId(int medicationId) {
         this.medicationId = medicationId;
     }
 
@@ -34,11 +34,11 @@ public class Reminder {
         this.reminderTime = reminderTime;
     }
 
-    public long getReminderId() {
+    public int getReminderId() {
         return reminderId;
     }
 
-    public void setReminderId(long reminderId) {
+    public void setReminderId(int reminderId) {
         this.reminderId = reminderId;
     }
 

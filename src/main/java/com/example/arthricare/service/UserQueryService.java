@@ -19,11 +19,15 @@ public class UserQueryService {
         return u;
     }
 
-    public User getUserById(Long id)
+    public User getUserById(int id)
     {
         User u = userMapper.findUserById(id);
         return u;
     }
 
+    public String getUserNameById(int id)
+    {
+        return userMapper.findUserById(id).getName();
+    }
 
 }

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>WebSocket Chat</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+<ul id="onlineUserList"></ul>
+
+<div id="messageModal" style="display: none;">
+  <h3>Send message to <span id="selectedUser"></span></h3>
+  <textarea id="messageText"></textarea>
+  <button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+  const socket = new SockJS('/ws');
+  const stompClient = Stomp.over(socket);
+  const loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
+  let currentUser = "";
+  const username = loggedInUser.name;
+  stompClient.connect({}, function(frame) {
+    fetchOnlineUsers();
+    registerUser();
+    stompClient.subscribe(`/chat/contact/${username}`, function(notification) {
+      console.log('Received notification: ');
+    });
+    stompClient.subscribe('/topic/newUser', function(user) {
+      addUserToUI(user);
+    });
+  });
+
+  function registerUser() {
+    // 此处我们使用一个简单的方法生成一个随机用户名。在实际应用中，您可能会使用更复杂的方法。
+    stompClient.send("/app/register", {}, username);
+  }
+
+  function addUserToUI(username) {
+    fetchOnlineUsers()
+  }
+
+  function fetchOnlineUsers() {
+    const userList = document.getElementById('onlineUserList');
+    userList.innerHTML = '';
+    fetch('/online-users')
+            .then(response => response.json())
+            .then(users => {
+              users.forEach(user => {
+                console.log(user);
+                const li = document.createElement('li');
+                li.textContent = user;
+                li.addEventListener('click', function() {
+                  openModal(user);
+                });
+                userList.appendChild(li);
+              });
+            });
+  }
+
+  function openModal(user) {
+    currentUser = user;
+    document.getElementById('selectedUser').textContent = user;
+    document.getElementById('messageModal').style.display = 'block';
+  }
+
+  function sendMessage() {
+
+    const message = document.getElementById('messageText').value;
+    stompClient.send("/app/message/" + currentUser, {}, message);
+    document.getElementById('messageModal').style.display = 'none';
+  }
+</script>
+
+</body>
+</html>

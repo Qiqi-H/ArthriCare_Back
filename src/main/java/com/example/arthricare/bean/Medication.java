@@ -8,8 +8,8 @@ import java.sql.Date;
 
 public class Medication {
 
-    private long medicationId;
-    private long userId;
+    private int medicationId;
+    private int userId;
     private String medicationType;
     private String medicationName;
     private String medicationCategory;
@@ -28,19 +28,19 @@ public class Medication {
     public Medication() {
     }
 
-    public long getMedicationId() {
+    public int getMedicationId() {
         return medicationId;
     }
 
-    public void setMedicationId(Integer id) {
+    public void setMedicationId(int id) {
         this.medicationId = id;
     }
 
-    public long getUserId() {
+    public int getUserId() {
         return userId;
     }
 
-    public void setUserId(Integer userId) {
+    public void setUserId(int userId) {
         this.userId = userId;
     }
 
