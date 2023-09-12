@@ -1,10 +1,11 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/arthricare?
+    url: jdbc:mysql://localhost:3306/arthricare?serverTimezone=UTC
     username: root
     password: root
 
+image-save-path: D:\321Project\ArthriCare git\ArthriCare_Back\src\main\resources\static\uploadImages\
 
 mybatis:
   configuration:

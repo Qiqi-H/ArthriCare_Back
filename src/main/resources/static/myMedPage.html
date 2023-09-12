@@ -106,9 +106,9 @@
         const userName = loggedInUser.name.trim() !== '' ? loggedInUser.name : 'guest';
         // Set the greeting message with the user's name or 'guest' if it's empty
         document.getElementById('userName').textContent = userName;
-
+        console.log(loggedInUser.userId);
         // 发起请求从后端获取用户的药物列表数据
-        fetch('/medications/findMedicationByUserId/' + loggedInUser.id)
+        fetch('/medications/findMedicationByUserId/' + loggedInUser.userId)
             .then(response => response.json()) // This will parse the response as JSON
             .then(function (medications) {
                 medications.forEach(function (medication) {

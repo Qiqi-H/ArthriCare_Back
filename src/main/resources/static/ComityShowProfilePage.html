@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    .post-card {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+<h1>User Profile</h1>
+<div>
+  <h2>User Information</h2>
+  <p><strong>Name:</strong> <span id="userName"></span></p>
+  <p><strong>Number of Posts:</strong> <span id="numPosts"></span></p>
+  <p><strong>Likes:</strong> <span id="numLikes"></span></p>
+  <button id="chatButton">Chat with User</button>
+</div>
+<hr>
+<h2>User's Posts</h2>
+<div id="userPosts">
+  <!-- User's posts will be displayed here -->
+</div>
+<script>
+  var loggedInUser = sessionStorage.getItem('loggedInUser');
+  if (loggedInUser) {
+    loggedInUser = JSON.parse(loggedInUser);
+  } else {
+    window.location.href = 'index.html'; // 如果用户未登录，可以根据需求进行逻辑处理，如跳转到登录页面
+  }
+
+  document.addEventListener("DOMContentLoaded", async function() {
+    const userProfileInfo = JSON.parse(sessionStorage.getItem("userProfileInfo"));
+
+    if (userProfileInfo) {
+      const userProfileId = userProfileInfo.userId;
+      const response = await fetch(`/ComityPost/getUserProfileInfor?userId=${userProfileId}`);
+      const userProfile = await response.json();
+
+      document.getElementById("userName").textContent = userProfileInfo.userName;
+      document.getElementById("numPosts").textContent = userProfile.numPosts;
+      document.getElementById("numLikes").textContent = userProfile.numLikes;
+
+      const chatButton = document.getElementById("chatButton");
+      if (loggedInUser.userId - userProfileId === 0) {
+        chatButton.style.display = "none"; // 如果用户ID相同，隐藏chatButton按钮
+      } else {
+        chatButton.addEventListener("click", function() {
+          const userFromId = `${loggedInUser.userId}-${loggedInUser.name}`;
+          const userToId = `${userProfileInfo.userId}-${userProfileInfo.userName}`;
+          createChatChannel(userFromId,userToId);
+
+        });
+      }
+
+      await loadUserPosts(userProfileId);
+    }
+  });
+
+  function createChatChannel(userFromId, userToId) {
+    fetch('/ComityChat/createChatChannel', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        userFromId: userFromId,
+        userToId: userToId
+      })
+    }).then(response => {
+      if (response.ok) {
+        return response.json(); // 解析响应数据为 JSON
+      } else {
+        console.error('Failed to create chat channel');
+      }
+    }).then(data => {
+      if (data) { // 检查是否存在响应数据
+        console.log('create chat channel successfully');
+        sessionStorage.setItem("chatChannelInfor", JSON.stringify(data)); // 存储响应数据
+        window.location.href = "testM2.html";
+      }
+    }).catch(error => {
+      console.error('Error creating chat channel:', error);
+    });
+  }
+  async function loadUserPosts(userId) {
+    const userPostsContainer = document.getElementById("userPosts");
+
+    const response = await fetch(`/ComityPost/getUserPosts?userId=${userId}`);
+    const userPosts = await response.json();
+
+    for (const post of userPosts) {
+      const postCard = document.createElement("div");
+      postCard.className = "post-card";
+
+      const title = document.createElement("h4");
+      title.textContent = post.title;
+      postCard.appendChild(title);
+
+      const content = document.createElement("p");
+      content.textContent = post.content.length > 100 ? post.content.substring(0, 100) + "..." : post.content;
+      postCard.appendChild(content);
+
+      if (post.haveImage) {
+        const imageResponse = await fetch(`/ComityPost/getPostImages?postId=${post.postId}`);
+        if (imageResponse.ok) {
+          const imagePaths = await imageResponse.json();
+          imagePaths.forEach(path => {
+            const img = document.createElement("img");
+            img.src = path;
+            img.style.maxWidth = '150px';
+            img.style.height = 'auto';
+            img.style.marginRight = '10px';
+            postCard.appendChild(img);
+          });
+        } else {
+          console.error('Failed to fetch images for post', post.postId);
+        }
+      }
+
+      const viewButton = document.createElement("button");
+      viewButton.className = "view-button";
+      viewButton.textContent = "View Post";
+      viewButton.setAttribute("data-post-id", post.postId);
+      viewButton.addEventListener("click", function() {
+        const postId = viewButton.getAttribute("data-post-id");
+        sessionStorage.setItem("postId", postId);
+        window.location.href = "ComityShowPostPage.html";
+      });
+      postCard.appendChild(viewButton);
+
+      userPostsContainer.appendChild(postCard);
+    }
+  }
+</script>
+</body>
+</html>

@@ -33,6 +33,7 @@
   <button onclick="window.location.href='myMedPage.html';">My Medication</button>
   <button onclick="window.location.href='myRewardPage.html';">My Rewards</button>
   <button onclick="window.location.href='myProfilePage.html';">My Profile</button>
+  <button onclick="window.location.href='CommunityHomePage.html';">Community</button>
 </p>
 
 <script>
@@ -74,7 +75,7 @@
       document.getElementById('userName').textContent = userName;
 
       const selectedDate = document.getElementById('datePicker').value;
-      const userId = loggedInUser.id;
+      const userId = loggedInUser.userId;
       //console.log(selectedDate)
       const data = {
         userId: userId,

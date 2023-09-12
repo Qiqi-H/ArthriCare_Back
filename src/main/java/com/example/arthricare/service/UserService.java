@@ -66,11 +66,11 @@ public class UserService {
 
         userMapper.createUser(u);
 
-        long id = userMapper.findUserByEmail(u.getEmail()).getId();
+        long id = userMapper.findUserByEmail(u.getEmail()).getUserId();
         rewardMapper.createReward(id);
     }
 
-    public void resetPassword(String newPassword,Long id)
+    public void resetPassword(String newPassword,int id)
     {
         userMapper.resetPassword(newPassword,id);
     }

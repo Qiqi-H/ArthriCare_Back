@@ -1,5 +1,6 @@
 package com.example.arthricare.controller;
 
+import com.example.arthricare.bean.valueObject.LoginUserData;
 import com.example.arthricare.service.UserQueryService;
 import com.example.arthricare.service.UserService;
 import com.example.arthricare.bean.User;
@@ -27,13 +28,15 @@ public class UserController {
     public ResponseEntity<User> login(@RequestBody User user) {
         if(userService.UserLogin(user))
         {
-            return ResponseEntity.ok(userQueryService.getUserByEmail(user.getEmail()));
+            User u = userQueryService.getUserByEmail(user.getEmail());
+            LoginUserData l = new LoginUserData(u.getUserId(),u.getName());
+            return ResponseEntity.ok(u);
         }
         else return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<User> getUserById(@PathVariable("userId") Long userId) {
+    public ResponseEntity<User> getUserById(@PathVariable("userId") int userId) {
         User user = userQueryService.getUserById(userId);
         if (user != null)
         {
@@ -63,7 +66,7 @@ public class UserController {
     @PutMapping("/updatePassword")
     public ResponseEntity<String> userUpdatePassword(@RequestBody User user)
     {
-        userService.resetPassword(user.getPassword(),user.getId());
+        userService.resetPassword(user.getPassword(),user.getUserId());
         return ResponseEntity.ok("update successfully");
     }
 
@@ -72,7 +75,7 @@ public class UserController {
     public ResponseEntity<User> updateUserInformation(@RequestBody User user)
     {
         userService.UpdateUserInformation(user);
-        return ResponseEntity.ok(userQueryService.getUserById(user.getId()));
+        return ResponseEntity.ok(userQueryService.getUserById(user.getUserId()));
     }
 
     //test for resetpage

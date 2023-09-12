@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    /* 样式同上 */
+    .post-content {
+      margin-top: 20px;
+      padding: 20px;
+      border: 1px solid #ddd;
+    }
+    #replyTextArea {
+      display: none;
+      width: 100%;
+      margin-top: 10px;
+    }
+    #submitReplyButton {
+      display: none;
+      margin-top: 10px;
+    }
+    .replies-container {
+      margin-top: 20px;
+      padding: 20px;
+      border: 1px solid #ddd;
+    }
+    .reply-card {
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid #eee;
+    }
+    .reply-user {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+<header>
+</header>
+<div class="post-content">
+  <h2 id="postUserName"></h2>
+  <p id="postTitle"></p>
+  <p id="postContent"></p>
+  <div id="postImages"></div> <!-- 为帖子图片添加一个容器 -->
+  <button id="replyButton">Reply</button>
+  <textarea id="replyTextArea" rows="4" placeholder="Enter your reply here"></textarea>
+  <button id="submitReplyButton">Submit</button>
+</div>
+
+<div class="replies-container" id="repliesContainer">
+  <!-- 这里将显示检索到的回复 -->
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", async function() {
+    const postId = sessionStorage.getItem('postId');
+
+    var loggedInUser = sessionStorage.getItem('loggedInUser');
+    loggedInUser = JSON.parse(loggedInUser);
+    // 从 session storage 获取 userId 和用户名
+    const userId = loggedInUser.userId;
+    const userName = loggedInUser.name;
+
+    const postTitle = document.getElementById('postTitle');
+    const postContent = document.getElementById('postContent');
+    const postUserName = document.getElementById('postUserName');
+    const replyButton = document.getElementById('replyButton');
+    const replyTextArea = document.getElementById('replyTextArea');
+    const submitReplyButton = document.getElementById('submitReplyButton');
+    const repliesContainer = document.getElementById('repliesContainer');
+    const postImagesContainer = document.getElementById('postImages');
+    let repliesLoaded = -1; // 已加载的帖子数量
+    const repliesPerLoad = 10; // 每次加载的帖子数量
+
+    if (postId) {
+      // 从后端获取帖子信息
+      const response = await fetch(`/ComityPost/getPostById?id=${postId}`);
+      const post = await response.json();
+
+      // 在页面展示帖子信息
+      postUserName.textContent = `Posted by: ${name}`;
+      postTitle.textContent = post.title;
+      postContent.textContent = post.content;
+
+      if (post.haveImage) {
+        const imageResponse = await fetch(`/ComityPost/getPostImages?postId=${post.postId}`);
+        if (imageResponse.ok) {
+          const imagePaths = await imageResponse.json();
+          imagePaths.forEach(path => {
+            const img = document.createElement("img");
+            img.src = path;
+            img.style.maxWidth = '300px';
+            img.style.height = 'auto';
+            img.style.marginRight = '10px';
+            postImagesContainer.appendChild(img);
+          });
+        } else {
+          console.error('Failed to fetch images for post', post.postId);
+        }
+      }
+
+
+      // 添加点击回复按钮的事件
+      replyButton.addEventListener('click', function() {
+        // 显示回复文本区域和提交按钮
+        replyTextArea.style.display = 'block';
+        submitReplyButton.style.display = 'block';
+      });
+
+      // 添加点击提交按钮的事件
+      submitReplyButton.addEventListener('click', async function() {
+        const replyContent = replyTextArea.value;
+        const currentTime = new Date(); // 获取当前时间戳
+
+        // 构造回复信息对象
+        const replyData = {
+          postId: postId,
+          userId: userId,
+          userName: userName,
+          content: replyContent,
+          createdTime: currentTime
+        };
+
+        const response = await fetch(`/ComityPostReply/addReply`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(replyData)
+        });
+
+        if (response.ok) {
+          // 在页面顶部添加新回复
+          const newReplyCard = document.createElement("div");
+          newReplyCard.className = "reply-card";
+
+          const replyUser = document.createElement("span");
+          replyUser.className = "reply-user";
+          replyUser.textContent = replyData.userName;
+          newReplyCard.appendChild(replyUser);
+
+          const replyContentElement = document.createElement("p");
+          replyContentElement.textContent = replyData.content;
+          newReplyCard.appendChild(replyContentElement);
+
+          repliesContainer.prepend(newReplyCard);
+
+          // 清空回复文本区域
+          replyTextArea.value = '';
+
+          // 隐藏回复文本区域和提交按钮
+          replyTextArea.style.display = 'none';
+          submitReplyButton.style.display = 'none';
+        } else {
+          alert('Failed to add reply.');
+        }
+      });
+
+      await loadMoreReplies();
+      // 加载并显示所有回复
+      async function loadMoreReplies() {
+        const response = await fetch(`/ComityPostReply/getReplies?postId=${postId}&start=${repliesLoaded}&count=${repliesPerLoad}`);
+        const replies = await response.json();
+
+        if (replies.length !== 0) {
+          // 显示加载的回复
+          replies.forEach(reply => {
+            const replyCard = document.createElement("div");
+            replyCard.className = "reply-card";
+
+            const replyUser = document.createElement("span");
+            replyUser.className = "reply-user";
+            replyUser.textContent = loggedInUser.name; // 假设回复对象中有 userName 属性
+            replyCard.appendChild(replyUser);
+
+            const replyContent = document.createElement("p");
+            replyContent.textContent = reply.content; // 假设回复对象中有 content 属性
+            replyCard.appendChild(replyContent);
+
+            repliesContainer.appendChild(replyCard);
+          });
+
+          repliesLoaded += replies.length;
+        }
+      }
+
+      window.addEventListener("scroll", function() {
+        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+          console.log("already at bottom");
+          loadMoreReplies();
+        }
+      });
+    }
+  });
+</script>
+</body>
+</html>

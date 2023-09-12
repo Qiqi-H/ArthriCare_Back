@@ -21,13 +21,13 @@ public class UserRewardService {
 
     }
 
-    public int getPoint(long id)
+    public int getPoint(int id)
     {
         return userMapper.findUserScoreById(id);
     }
 
 
-    public void claimLoginReward(long id)
+    public void claimLoginReward(int id)
     {
         Date loginRewardClaimedDate = new Date();
         rewardMapper.claimLoginReward(false,loginRewardClaimedDate,id);
@@ -70,7 +70,7 @@ public class UserRewardService {
         return result;
     }
 
-    public void claimProfileReward(long id)
+    public void claimProfileReward(int id)
     {
         rewardMapper.changeProfileRewardStatue(true,id);
         userMapper.addPointsToUser(100,id);
@@ -81,14 +81,14 @@ public class UserRewardService {
         return rewardMapper.getProfileRewardStatue(id);
     }
 
-    public boolean determineCompleteProfileStatue(long id)
+    public boolean determineCompleteProfileStatue(int id)
     {
         User user = userMapper.findUserById(id);
 
         boolean bName = user.getName().length()!=0;
         boolean bAge = user.getAge()!=0;
         boolean bGender = user.getGender().length()!=0;
-        boolean bWeight = user.getWeight() != null;
+        boolean bWeight = user.getWeight() != 0;
 
         System.out.println(bName);
         System.out.println(bAge);
@@ -101,7 +101,7 @@ public class UserRewardService {
         return false;
     }
 
-    public void claimTakeMedicationReward(long userId)
+    public void claimTakeMedicationReward(int userId)
     {
         userMapper.addPointsToUser(100,userId);
     }

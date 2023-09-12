@@ -1,59 +1,72 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Dynamic Button Creation</title>
+  <title>Multiple Image Upload Example</title>
+  <style>
+    #imageInput {
+      margin-top: 10px;
+    }
+
+    .imagePreview {
+      max-width: 100%;
+      max-height: 300px;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
-<div id="buttonContainer">
-  <!-- Your dynamically created buttons will be added here -->
-</div>
+<h1>Multiple Image Upload Example</h1>
+<input type="file" id="imageInput" multiple>
+<button id="submitImages">Submit Images</button>
+<div id="imagePreviews"></div>
 
 <script>
-  // Function to create a new button and add it to the container
-  function createButton() {
-    var buttonContainer = document.getElementById("buttonContainer");
+  const imageInput = document.getElementById('imageInput');
+  const submitImages = document.getElementById('submitImages');
+  const imagePreviews = document.getElementById('imagePreviews');
 
-    // Create a new button element
-    var button = document.createElement("button");
-    button.innerHTML = "Dynamic Button"; // Set the button text
+  imageInput.addEventListener('change', function(event) {
+    const selectedFiles = event.target.files;
 
-    // Generate a unique id for the button (e.g., "button1", "button2", etc.)
-    var buttonId = "button" + (buttonContainer.children.length + 1);
-    button.setAttribute("id", buttonId);
+    imagePreviews.innerHTML = ''; // Clear previous previews
 
-    // Append the button to the container
-    buttonContainer.appendChild(button);
+    for (let i = 0; i < selectedFiles.length; i++) {
+      const reader = new FileReader();
 
-    return button; // Return the created button
-  }
+      reader.onload = function() {
+        const imagePreview = document.createElement('img');
+        imagePreview.src = reader.result;
+        imagePreview.alt = 'Image Preview';
+        imagePreview.className = 'imagePreview'; // Add a class for styling
+        imagePreviews.appendChild(imagePreview);
+      };
 
-  // Function to handle the click event for the dynamically created buttons
-  function handleButtonClick(event) {
-    var buttonId = event.target.id;
-    alert("You clicked " + buttonId);
-  }
+      reader.readAsDataURL(selectedFiles[i]);
+    }
+  });
 
-  // Wait for the DOM content to be loaded
-  document.addEventListener("DOMContentLoaded", function() {
-    var buttonContainer = document.getElementById("buttonContainer");
+  submitImages.addEventListener('click', async function() {
+    const selectedFiles = imageInput.files;
 
-    // Create and add a new button to the container
-    var button1 = createButton();
+    for (let i = 0; i < selectedFiles.length; i++) {
+      const formData = new FormData();
+      formData.append('image', selectedFiles[i]);
 
-    // Create and add another button to the container
-    var button2 = createButton();
+      const response = await fetch('/ComityPost/createPostImage', {
+        method: 'POST',
+        body: formData
+      });
 
-    // Add click event listeners to the dynamically created buttons
-    button1.addEventListener("click", handleButtonClick);
-    button2.addEventListener("click", handleButtonClick);
-
-    // You can add more buttons and event listeners as needed.
+      if (response.ok) {
+        const imagePath = await response.text();
+        console.log(imagePath);
+      } else {
+        alert('Failed to upload image.');
+      }
+    }
+    imagePreviews.innerHTML = '';
+    alert('All images uploaded.');
   });
 </script>
 </body>
 </html>
-
-
-
-
-

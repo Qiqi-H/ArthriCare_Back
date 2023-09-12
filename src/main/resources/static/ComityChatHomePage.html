@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat History</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    .chat-container {
+      max-width: 600px;
+      margin: 50px auto;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      border-radius: 8px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .search-bar {
+      margin-bottom: 20px;
+    }
+
+    .search-bar input {
+      width: 80%; /* Adjust the width as per your needs */
+      max-width: 400px; /* Maximum width for the search bar */
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin: 0 auto; /* Center the search bar */
+      display: block; /* Make sure the input behaves like a block element */
+    }
+
+    .chat-list {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .chat-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .chat-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 10px;
+    }
+
+    .chat-info {
+      flex: 1;
+    }
+
+    .chat-name {
+      font-weight: bold;
+      display: block;
+    }
+
+    .chat-message {
+      color: #888;
+    }
+
+    .chat-item:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+
+<body>
+<div class="chat-container">
+  <h2>Message</h2>
+  <div class="search-bar">
+    <input type="text" placeholder="Search user...">
+  </div>
+  <ul class="chat-list">
+    <!-- Chat items will be dynamically populated here -->
+  </ul>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var loggedInUser = sessionStorage.getItem('loggedInUser');
+    if (loggedInUser) {
+      loggedInUser = JSON.parse(loggedInUser);
+      const userFromId = `${loggedInUser.userId}-${loggedInUser.name}`;
+      getChannels(userFromId);
+    } else {
+      window.location.href = 'index.html';
+    }
+
+    function getChannels(userFromId) {
+      console.log(userFromId);
+      fetch(`/ComityChat/getChatChannel?userFromId=${userFromId}`)
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Network response was not ok');
+                }
+                return response.json();
+              })
+              .then(data => {
+                const chatList = document.querySelector('.chat-list');
+
+                data.forEach(chat => {
+                  console.log(chat);
+
+                  var chatItem = document.createElement('li');
+                  chatItem.className = 'chat-item';
+
+                  var chatInfoElement = document.createElement('div');
+                  chatInfoElement.className = 'chat-info';
+
+                  // 添加用户名
+                  var userName = document.createElement('span');
+                  userName.className = 'chat-name';
+                  if (chat.userFromId === userFromId) {
+                    userName.textContent = chat.userToId.split('-')[1];
+                  } else {
+                    userName.textContent = chat.userFromId.split('-')[1];
+                    const t = chat.userFromId;
+                    chat.userFromId = chat.userToId;
+                    chat.userToId = t;
+                  }
+
+                  // 添加消息
+                  var userMessage = document.createElement('span');
+                  userMessage.className = 'chat-message';
+                  userMessage.textContent = chat.newContent;
+
+                  chatInfoElement.appendChild(userName);
+                  chatInfoElement.appendChild(userMessage);
+                  chatItem.appendChild(chatInfoElement);
+
+                  chatItem.addEventListener('click', function() {
+                    sessionStorage.setItem("chatChannelInfor", JSON.stringify(chat)); // 存储响应数据
+                    window.location.href = "testM2.html";
+                  });
+
+                  // 将新创建的chat-item元素添加到.chat-list中
+                  chatList.appendChild(chatItem);
+                });
+              })
+              .catch(error => {
+                console.log('Fetch error: ', error);
+              });
+    }
+  });
+</script>
+</html>
+

@@ -84,7 +84,7 @@ public class MedicationController {
 
 
     @GetMapping("checkMedicationExpiration/{medicationId}")
-    public ResponseEntity<Boolean> checkMedicationExpiration(@PathVariable("medicationId") Long medicationId) {
+    public ResponseEntity<Boolean> checkMedicationExpiration(@PathVariable("medicationId") int medicationId) {
         if (medicationService.checkMedicationExpiration(medicationId))
         {
             medicationService.updateMedicationExpirationStatues(medicationId,true);

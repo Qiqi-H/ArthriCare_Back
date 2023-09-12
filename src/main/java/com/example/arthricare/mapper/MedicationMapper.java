@@ -21,7 +21,7 @@ public interface MedicationMapper {
     void updateMedication(Medication medication);
 
     @Delete("DELETE FROM medications WHERE id = #{id}")
-    void deleteMedication(Integer id);
+    void deleteMedication(int id);
 
     @Select("SELECT * FROM medications WHERE medication_id = #{medication_id}")
     @Results({
@@ -33,7 +33,7 @@ public interface MedicationMapper {
             @Result(property = "endDate", column = "end_date"),
             @Result(property = "medicationExpiration", column = "medicationExpiration")
     })
-    Medication findById(long medication_id);
+    Medication findById(int medication_id);
 
     @Select("SELECT * FROM medications")
     @Results({
@@ -57,14 +57,14 @@ public interface MedicationMapper {
             @Result(property = "endDate", column = "end_date"),
             @Result(property = "medicationExpiration", column = "medicationExpiration")
     })
-    List<Medication> findMedicationByUserId(@Param("userId") long userId);
+    List<Medication> findMedicationByUserId(@Param("userId") int userId);
 
     @Select("SELECT reminder_id FROM reminders WHERE medication_id IN (SELECT medication_id FROM medications WHERE user_id = #{userId}) AND date = #{date}")
-    List<Long> findReminderIdsByUserIdAndDate(@Param("userId") long userId, @Param("date") Date date);
+    List<Long> findReminderIdsByUserIdAndDate(@Param("userId") int userId, @Param("date") Date date);
 
 
     @Update("UPDATE medications SET medicationExpiration = #{statue} WHERE medication_id = #{medicationId}")
-    void updateMedicationExpiration(@Param("medicationId") long medicationId, @Param("statue") boolean statue);
+    void updateMedicationExpiration(@Param("medicationId") int medicationId, @Param("statue") boolean statue);
 
 }
 
