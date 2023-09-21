@@ -19,6 +19,7 @@ public class ComityPostReplyService {
     public void createPostReply(ComityPostReply comityPostReply)
     {
         comityPostReplyMapper.createPostReply(comityPostReply);
+        comityPostReplyMapper.addReplyNumber(comityPostReply.getPostId());
     }
 
     public List<ComityPostReply> getRepliesByPostId(int postId, int start, int count)

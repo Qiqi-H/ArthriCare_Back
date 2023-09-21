@@ -94,6 +94,7 @@
             {
                 // 显示加载的帖子
                 for (const post of posts) {
+                    console.log(post);
                     const postCard = document.createElement("div");
                     postCard.className = "post-card";
 
@@ -159,6 +160,18 @@
                         window.location.href = "ComityShowPostPage.html"
                     });
                     postCard.appendChild(viewButton);
+
+                    const likeButton = document.createElement("button");
+                    likeButton.className = "like-button";
+                    likeButton.textContent = "Like Post";
+                    likeButton.setAttribute("data-post-id", post.postId);
+                    likeButton.addEventListener("click", function() {
+                        const postId = viewButton.getAttribute("data-post-id");
+                        fetch(`/ComityPost/addLikeNum?postId=${postId}`);
+                    });
+
+                    postCard.appendChild(likeButton);
+
 
                     postContainer.appendChild(postCard);
                 }

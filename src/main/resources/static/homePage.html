@@ -138,6 +138,7 @@
       medicationsContainer.appendChild(timeElement);
 
       medsAtTime.forEach(med => {
+        console.log(med);
         const medElement = document.createElement('div');
         medElement.innerHTML = `
         <h3>Medication Name: ${med.medicationName}</h3>

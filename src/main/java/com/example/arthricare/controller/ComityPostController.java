@@ -66,4 +66,10 @@ public class ComityPostController {
     public List<ComityPost> getAllPost(){
         return comityPostService.getAllPost();
     }
+
+    @GetMapping("/addLikeNum")
+    public  ResponseEntity<String> addLikeNum(@RequestParam int postId){
+
+        return ResponseEntity.ok(comityPostService.addLikeNum(postId));
+    }
 }

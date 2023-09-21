@@ -76,6 +76,7 @@ public class MedicationService {
             data.setAlreadyTakeMedication(r.isAlreadyTakeMedication());
             data.setReminderId(rId);
             data.setCategory(m.getMedicationCategory());
+            data.setNote(m.getNote());
             homePageMedDataList.add(data);
         }
         return homePageMedDataList;

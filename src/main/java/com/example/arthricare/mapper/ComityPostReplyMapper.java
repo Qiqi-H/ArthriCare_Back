@@ -2,10 +2,7 @@ package com.example.arthricare.mapper;
 
 import com.example.arthricare.bean.ComityPost;
 import com.example.arthricare.bean.ComityPostReply;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -19,4 +16,7 @@ public interface ComityPostReplyMapper {
 
     @Select("SELECT * FROM community_posts_replies WHERE reply_id > #{start} AND post_id = #{post_id} LIMIT #{count}")
     List<ComityPostReply> getRepliesByPostId(@Param("post_id") int post_id, @Param("start") int start, @Param("count") int count);
+
+    @Update("UPDATE community_posts SET comment_num = comment_num + 1 WHERE post_id = #{post_id}")
+    void addReplyNumber(@Param("post_id") int post_id);
 }

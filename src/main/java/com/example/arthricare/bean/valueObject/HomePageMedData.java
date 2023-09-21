@@ -17,6 +17,8 @@ public class HomePageMedData {
     private boolean alreadyTakeMedication;
     private LocalDateTime takeMedTime;
 
+    private String note;
+
 
     public HomePageMedData() {
     }
@@ -77,6 +79,15 @@ public class HomePageMedData {
         this.category = category;
     }
 
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
     @Override
     public String toString() {
         return "HomePageMedData{" +
@@ -84,8 +95,10 @@ public class HomePageMedData {
                 ", medicationName='" + medicationName + '\'' +
                 ", reminderTime=" + reminderTime +
                 ", dosageUnit=" + dosageUnit +
+                ", category='" + category + '\'' +
                 ", alreadyTakeMedication=" + alreadyTakeMedication +
                 ", takeMedTime=" + takeMedTime +
+                ", note='" + note + '\'' +
                 '}';
     }
 }

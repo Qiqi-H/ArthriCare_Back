@@ -65,4 +65,10 @@ public class ComityPostService {
         }
         return posts;
     }
+
+    public String addLikeNum(int postId)
+    {
+        comityPostMapper.addLikeNumber(postId);
+        return "add like to post";
+    }
 }

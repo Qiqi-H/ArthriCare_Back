@@ -31,7 +31,8 @@ public interface MedicationMapper {
             @Result(property = "dosageUnit", column = "dosage_unit"),
             @Result(property = "startDate", column = "start_date"),
             @Result(property = "endDate", column = "end_date"),
-            @Result(property = "medicationExpiration", column = "medicationExpiration")
+            @Result(property = "medicationExpiration", column = "medicationExpiration"),
+            @Result(property = "note", column = "note")
     })
     Medication findById(int medication_id);
 

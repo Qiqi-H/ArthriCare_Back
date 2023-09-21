@@ -50,5 +50,7 @@ public interface ComityPostMapper {
     })
     List<ComityPost> getAllPost();
 
+    @Update("UPDATE community_posts SET like_num = like_num + 1 WHERE post_id = #{post_id}")
+    void addLikeNumber(@Param("post_id") int post_id);
 
 }
