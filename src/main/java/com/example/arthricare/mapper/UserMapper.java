@@ -34,4 +34,10 @@ public interface UserMapper {
     @Update("UPDATE users SET name = #{name}, gender = #{gender}, weight = #{weight}, age = #{age}, email = #{email} WHERE user_id = #{user_id}")
     void updateUserInformation(User user);
 
+    // test for reset
+
+    @Update("UPDATE users SET password = #{newPassword} WHERE email = #{email}")
+    void resetPasswordByEmail(@Param("newPassword") String newPassword, @Param("email") String email);
+
+
 }

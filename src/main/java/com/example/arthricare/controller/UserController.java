@@ -78,4 +78,14 @@ public class UserController {
         return ResponseEntity.ok(userQueryService.getUserById(user.getUserId()));
     }
 
+    //test for resetpage
+    @PutMapping("/updatePasswordbyemail")
+    public ResponseEntity<String> userUpdatePasswordbyemail(@RequestBody User user) {
+        userService.resetPasswordtest(user.getPassword(), user.getEmail());
+        System.out.println("Update successfully");
+        return ResponseEntity.ok().build();
+    }
+
+
+
 }
