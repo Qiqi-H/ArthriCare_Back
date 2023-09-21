@@ -61,4 +61,9 @@ public class ComityPostController {
     {
         return comityPostService.getUserProfileInfor(userId);
     }
+
+    @GetMapping("/getAllPost")
+    public List<ComityPost> getAllPost(){
+        return comityPostService.getAllPost();
+    }
 }

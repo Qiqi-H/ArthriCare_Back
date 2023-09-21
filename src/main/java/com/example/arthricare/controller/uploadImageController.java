@@ -49,4 +49,18 @@ public class uploadImageController {
                     .body("Failed to upload the image due to an I/O error.");
         }
     }
+
+    @PostMapping("/puzzleImage")
+    public ResponseEntity<String> createPuzzleImage(
+            @RequestParam("puzzleId") int puzzleId,
+            @RequestParam("image") MultipartFile image
+    ) {
+        try {
+            uploadImageService.uploadReplyImage(puzzleId, image);
+            return ResponseEntity.ok("upload successfully");
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to upload the image due to an I/O error.");
+        }
+    }
 }

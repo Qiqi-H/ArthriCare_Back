@@ -55,4 +55,14 @@ public class ComityPostService {
         data.setNumLikes(comityPostMapper.getUserPostLikeCount(userId));
         return data;
     }
+
+    public List<ComityPost> getAllPost()
+    {
+        List<ComityPost> posts = comityPostMapper.getAllPost();
+        for(ComityPost post:posts)
+        {
+            post.setUserName(userQueryService.getUserNameById(post.getUserId()));
+        }
+        return posts;
+    }
 }

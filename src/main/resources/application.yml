@@ -6,6 +6,7 @@ spring:
     password: root
 
 image-save-path: D:\321Project\ArthriCare git\ArthriCare_Back\src\main\resources\static\uploadImages\
+puzzle-image-save-path: D:\321Project\ArthriCare git\ArthriCare_Back\src\main\resources\static\puzzleImage\
 
 mybatis:
   configuration:

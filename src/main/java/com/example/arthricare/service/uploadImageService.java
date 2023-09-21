@@ -20,6 +20,8 @@ public class uploadImageService {
 
     @Value("${image-save-path}")
     private String uploadDir;
+    @Value("${puzzle-image-save-path}")
+    private String uploadPuzzleDir;
     private final uploadImageMapper uploadImageMapper;
 
     public uploadImageService(com.example.arthricare.mapper.uploadImageMapper uploadImageMapper) {
@@ -62,4 +64,32 @@ public class uploadImageService {
         String uuid = UUID.randomUUID().toString();
         return uuid + "_" + timestamp + ".png"; // 添加 .png 扩展名
     }
+
+    public void uploadPuzzleImage(int puzzleId, MultipartFile image) throws IOException {
+        savePuzzleImage(puzzleId, image);
+    }
+
+    private void savePuzzleImage(int puzzleId, MultipartFile image) throws IOException {
+        if (image.isEmpty()) {
+            throw new IllegalArgumentException("Image file is empty");
+        }
+
+        // 为拼图创建特定的子目录
+        String puzzleSubDir = "puzzleImage/puzzle_" + puzzleId;
+
+        Path puzzleUploadPath = Path.of(uploadPuzzleDir, puzzleSubDir);
+        if (!Files.exists(puzzleUploadPath)) {
+            Files.createDirectories(puzzleUploadPath);
+        }
+
+        // 使用原始文件名保存文件
+        String originalFileName = image.getOriginalFilename();
+        if (originalFileName == null) {
+            throw new IllegalArgumentException("Original file name is null");
+        }
+
+        Path filePath = puzzleUploadPath.resolve(originalFileName);
+        Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+    }
+
 }

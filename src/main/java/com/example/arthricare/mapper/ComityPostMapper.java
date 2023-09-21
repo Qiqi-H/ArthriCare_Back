@@ -2,6 +2,7 @@ package com.example.arthricare.mapper;
 
 
 import com.example.arthricare.bean.ComityPost;
+import com.example.arthricare.bean.valueObject.ChatMessage;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -34,4 +35,20 @@ public interface ComityPostMapper {
 
     @Select("SELECT SUM(like_num) FROM community_posts WHERE user_id = #{user_id}")
     int getUserPostLikeCount(@Param("user_id") int user_Id);
+
+    @Select("SELECT *, FROM_UNIXTIME(created_timestamp,\"%Y-%m-%d %H:%m:%s\") AS formatted_time " +
+            "FROM community_posts ")
+    @Results({
+            @Result(property = "postId", column = "post_id"),
+            @Result(property = "userId", column = "user_id"),
+            @Result(property = "title", column = "title"),
+            @Result(property = "content", column = "content"),
+            @Result(property = "haveImage", column = "have_image"),
+            @Result(property = "likeNum", column = "like_num"),
+            @Result(property = "commentNum", column = "comment_num"),
+            @Result(property = "createdTime", column = "formatted_time", javaType = java.util.Date.class),
+    })
+    List<ComityPost> getAllPost();
+
+
 }

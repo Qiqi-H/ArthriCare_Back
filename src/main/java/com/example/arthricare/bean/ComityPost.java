@@ -20,6 +20,10 @@ public class ComityPost {
 
     boolean haveImage;
 
+    int likeNum;
+
+    int commentNum;
+
     public ComityPost() {
     }
 
@@ -87,16 +91,35 @@ public class ComityPost {
         this.userName = userName;
     }
 
+    public int getLikeNum() {
+        return likeNum;
+    }
+
+    public void setLikeNum(int likeNum) {
+        this.likeNum = likeNum;
+    }
+
+    public int getCommentNum() {
+        return commentNum;
+    }
+
+    public void setCommentNum(int commentNum) {
+        this.commentNum = commentNum;
+    }
+
     @Override
     public String toString() {
         return "ComityPost{" +
                 "postId=" + postId +
                 ", userId=" + userId +
+                ", userName='" + userName + '\'' +
                 ", title='" + title + '\'' +
                 ", content='" + content + '\'' +
                 ", createdTime=" + createdTime +
                 ", forumSection='" + forumSection + '\'' +
                 ", haveImage=" + haveImage +
+                ", likeNum=" + likeNum +
+                ", commentNum=" + commentNum +
                 '}';
     }
 }
