@@ -72,4 +72,21 @@ public class ComityPostController {
 
         return ResponseEntity.ok(comityPostService.addLikeNum(postId));
     }
+
+    // don's code
+    @DeleteMapping("/deletePost")
+    public ResponseEntity<String> deletePost(@RequestParam int postId) {
+        // Implement the logic to delete the post and its associated image (if any)
+        boolean deleted = comityPostService.deletePost(postId);
+
+        if (deleted) {
+            return ResponseEntity.ok("Post deleted successfully");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
 }
+
+

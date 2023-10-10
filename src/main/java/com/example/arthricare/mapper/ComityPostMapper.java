@@ -53,4 +53,8 @@ public interface ComityPostMapper {
     @Update("UPDATE community_posts SET like_num = like_num + 1 WHERE post_id = #{post_id}")
     void addLikeNumber(@Param("post_id") int post_id);
 
+    // don's code
+    @Delete("DELETE FROM community_posts WHERE post_id = #{post_id}")
+    void deletePost(@Param("post_id") int postId);
+
 }
