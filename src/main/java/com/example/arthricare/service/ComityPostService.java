@@ -4,6 +4,8 @@ import com.example.arthricare.bean.ComityPost;
 import com.example.arthricare.bean.valueObject.ComityUserProfileData;
 import com.example.arthricare.mapper.ComityPostMapper;
 import org.springframework.stereotype.Service;
+import java.io.File;
+
 
 import java.util.List;
 
