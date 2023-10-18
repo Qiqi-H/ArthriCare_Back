@@ -1,5 +1,4 @@
-# ArthriCare
-# Introduction
+# ArthriCare:Introduction
 The Rheumatism Management Tool is an application designed specifically for patients with rheumatism. Our core philosophy is to assist and motivate patients to take their medication regularly through gamified methods, thereby better managing their condition.
 
 # Features
