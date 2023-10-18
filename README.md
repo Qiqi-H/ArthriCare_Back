@@ -10,6 +10,14 @@ The **Rheumatism Management Tool** is an application designed specifically for p
 ## Tech Stack
 - Java 17
 - MySQL
+- Spring Boot 3.1.0
+  - Spring JDBC
+  - Spring Web
+  - MyBatis Spring Boot Starter 3.0.2
+  - MySQL Connector/J (Runtime)
+  - Jackson Databind 2.13.0
+  - Spring Websocket
+  - Spring Boot Test (Test scope)
 
 ## Installation & Usage
 ### Installing Java 17
@@ -24,3 +32,11 @@ The **Rheumatism Management Tool** is an application designed specifically for p
 3. Double-click the downloaded installer and follow the on-screen instructions.
 4. Once installed, ensure the MySQL service has started.
 5. Verify the installation: Connect to the database either through the MySQL command-line client or other tools like MySQL Workbench.
+
+### Setting up Spring Boot Application
+1. Clone the repository to your local machine.
+2. Navigate to the project root and run `mvn clean install` to download dependencies and build the project.
+3. To start the Spring Boot application, you can either:
+   - Run `mvn spring-boot:run` from the command line.
+   - Or run the main application class from your favorite IDE.
+4. Access the application on `http://localhost:8080`.
