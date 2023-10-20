@@ -22,6 +22,8 @@ public class Medication {
 
     private String note;
 
+    private String reminderDate;
+
     private String reminderTimes;
 
     private boolean medicationExpiration;
@@ -124,6 +126,14 @@ public class Medication {
         this.medicationExpiration = medicationExpiration;
     }
 
+    public String getReminderDate() {
+        return reminderDate;
+    }
+
+    public void setReminderDate(String reminderDate) {
+        this.reminderDate = reminderDate;
+    }
+
     @Override
     public String toString() {
         return "Medication{" +
@@ -137,6 +147,7 @@ public class Medication {
                 ", startDate=" + startDate +
                 ", endDate=" + endDate +
                 ", note='" + note + '\'' +
+                ", reminderDate='" + reminderDate + '\'' +
                 ", reminderTimes='" + reminderTimes + '\'' +
                 ", medicationExpiration=" + medicationExpiration +
                 '}';

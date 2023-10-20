@@ -30,7 +30,12 @@ public class MedicationService {
     public void createMedication(Medication medication) {
         medicationMapper.insertMedication(medication);
         int medicationId = medication.getMedicationId();
-        reminderService.createReminders(medication.getReminderTimes(),medicationId,medication.getStartDate(),medication.getEndDate());
+
+        if(medication.getFrequency()=="Daily medication")
+        {
+            reminderService.createDailyReminders(medication.getReminderTimes(),medicationId,medication.getStartDate(),medication.getEndDate());
+        }
+        else if(medication.getFrequency()=="Daily medication")
         userMapper.addPointsToUser(150,medication.getUserId());
     }
 

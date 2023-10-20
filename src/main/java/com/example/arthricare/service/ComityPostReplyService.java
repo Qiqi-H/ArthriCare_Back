@@ -11,9 +11,11 @@ import java.util.List;
 public class ComityPostReplyService {
 
     private final ComityPostReplyMapper comityPostReplyMapper;
+    private final UserQueryService userQueryService;
 
-    public ComityPostReplyService(ComityPostReplyMapper comityPostReplyMapper) {
+    public ComityPostReplyService(ComityPostReplyMapper comityPostReplyMapper, UserQueryService userQueryService) {
         this.comityPostReplyMapper = comityPostReplyMapper;
+        this.userQueryService = userQueryService;
     }
 
     public void createPostReply(ComityPostReply comityPostReply)
@@ -25,5 +27,15 @@ public class ComityPostReplyService {
     public List<ComityPostReply> getRepliesByPostId(int postId, int start, int count)
     {
         return comityPostReplyMapper.getRepliesByPostId(postId,start,count);
+    }
+
+    public List<ComityPostReply> getAllReplies(int postId)
+    {
+        List<ComityPostReply> tList = comityPostReplyMapper.getAllReplies(postId);
+        for(ComityPostReply c:tList)
+        {
+            c.setUserName(userQueryService.getUserNameById(c.getUserId()));
+        }
+        return comityPostReplyMapper.getAllReplies(postId);
     }
 }

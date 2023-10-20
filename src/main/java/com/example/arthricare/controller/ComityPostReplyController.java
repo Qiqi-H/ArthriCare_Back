@@ -33,4 +33,9 @@ public class ComityPostReplyController {
     public List<ComityPostReply> getReplies(@RequestParam int postId, @RequestParam int start, @RequestParam int count) {
         return comityPostReplyService.getRepliesByPostId(postId, start, count);
     }
+
+    @GetMapping("/getAllReplies")
+    public List<ComityPostReply> getAllReplies(@RequestParam int postId) {
+        return comityPostReplyService.getAllReplies(postId);
+    }
 }

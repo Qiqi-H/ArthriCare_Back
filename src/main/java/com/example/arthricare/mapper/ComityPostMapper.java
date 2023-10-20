@@ -20,10 +20,26 @@ public interface ComityPostMapper {
     List<ComityPost> getPostsByCategory(@Param("category") String category, @Param("start") int start, @Param("count") int count);
 
 
-    @Select("SELECT * FROM community_posts WHERE user_id = #{user_id}")
+    @Select("SELECT *, FROM_UNIXTIME(created_timestamp,\"%Y-%m-%d %H:%m:%s\") AS formatted_time " +
+            "FROM community_posts " +
+            "WHERE user_id = #{user_id}")
+    @Results({
+            @Result(property = "postId", column = "post_id"),
+            @Result(property = "userId", column = "user_id"),
+            @Result(property = "title", column = "title"),
+            @Result(property = "content", column = "content"),
+            @Result(property = "haveImage", column = "have_image"),
+            @Result(property = "likeNum", column = "like_num"),
+            @Result(property = "commentNum", column = "comment_num"),
+            @Result(property = "createdTime", column = "formatted_time", javaType = java.util.Date.class),
+    })
     List<ComityPost> getUserPosts(@Param("user_id") int user_id);
 
-    @Select("SELECT * FROM community_posts WHERE post_id = #{post_id}")
+
+    @Select("SELECT *, FROM_UNIXTIME(created_timestamp,\"%Y-%m-%d %H:%m:%s\") AS formatted_time " +
+            "FROM community_posts " +
+            "WHERE post_id = #{post_id}")
+    @Result(property = "createdTime", column = "formatted_time", javaType = java.util.Date.class)
     ComityPost getPostById(@Param("post_id") int post_id);
 
 

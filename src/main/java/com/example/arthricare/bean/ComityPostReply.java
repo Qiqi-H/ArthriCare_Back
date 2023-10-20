@@ -9,9 +9,12 @@ public class ComityPostReply {
 
     private int userId;
 
+    private String userName;
+
     private String content;
 
     private Date createdTime;
+
 
     public ComityPostReply() {
     }
@@ -56,12 +59,21 @@ public class ComityPostReply {
         this.createdTime = createdTime;
     }
 
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
     @Override
     public String toString() {
         return "ComityPostReply{" +
                 "replyId=" + replyId +
                 ", postId=" + postId +
                 ", userId=" + userId +
+                ", userName='" + userName + '\'' +
                 ", content='" + content + '\'' +
                 ", createdTime=" + createdTime +
                 '}';

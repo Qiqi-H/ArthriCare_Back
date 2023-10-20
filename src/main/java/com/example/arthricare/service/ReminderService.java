@@ -22,7 +22,7 @@ public class ReminderService {
         this.reminderMapper = reminderMapper;
     }
 
-    public void createReminders(String reminderTimesJson, int medicationId, Date startDate, Date endDate) {
+    public void createDailyReminders(String reminderTimesJson, int medicationId, Date startDate, Date endDate) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             // 将JSON字符串解析成数组
@@ -74,7 +74,7 @@ public class ReminderService {
     public void updateReminder(String reminderTimesJson, int medicationId, Date startDate, Date endDate)
     {
         reminderMapper.deleteReminderByMedicationId(medicationId);
-        createReminders(reminderTimesJson,medicationId,startDate,endDate);
+        createDailyReminders(reminderTimesJson,medicationId,startDate,endDate);
     }
 
     private boolean isSameDay(Date date1, Date date2) {
