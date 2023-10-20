@@ -4,6 +4,8 @@ import com.example.arthricare.bean.ComityPost;
 import com.example.arthricare.bean.valueObject.ComityUserProfileData;
 import com.example.arthricare.mapper.ComityPostMapper;
 import org.springframework.stereotype.Service;
+import java.io.File;
+
 
 import java.util.List;
 
@@ -71,4 +73,43 @@ public class ComityPostService {
         comityPostMapper.addLikeNumber(postId);
         return "add like to post";
     }
+
+    // don's code
+    public boolean deletePost(int postId) {
+        // Retrieve the post by ID
+        ComityPost post = comityPostMapper.getPostById(postId);
+
+        if (post == null) {
+            return false; // Post not found
+        }
+
+        // Check if the post has an associated image
+        if (post.isHaveImage()) {
+            // Retrieve the image paths
+            List<String> imagePaths = comityPostMapper.getPostImage(postId);
+
+            // Delete the images
+            for (String imagePath : imagePaths) {
+                // logic to delete the image
+                File imageFile = new File(imagePath);
+                if (imageFile.exists()) {
+                    if (imageFile.delete()) {
+                        // Image file deleted successfully
+                    } else {
+                        // Error if file is unable to delete
+                    }
+                } else {
+                    // Error if the image file doesn't exist
+                }
+            }
+        }
+
+        // Delete the post
+        comityPostMapper.deletePost(postId);
+
+        return true; // Post deleted successfully
+    }
+
+
+
 }
