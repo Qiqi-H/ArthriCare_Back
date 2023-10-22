@@ -4,13 +4,9 @@ import com.example.arthricare.bean.Reminder;
 import com.example.arthricare.mapper.ReminderMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
-
-import javax.swing.*;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -20,6 +16,46 @@ public class ReminderService {
 
     public ReminderService(ReminderMapper reminderMapper) {
         this.reminderMapper = reminderMapper;
+    }
+
+    public void createIntermittentReminders(String reminderTimesJson, int medicationId,String dateValue) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
+
+        try {
+            String[] reminderDateArray = objectMapper.readValue(dateValue, String[].class);
+            String[] reminderTimesArray = objectMapper.readValue(reminderTimesJson, String[].class);
+
+            for (String reminderDate : reminderDateArray) {
+                Date parsedDate = dateFormat.parse(reminderDate);
+
+                for (String reminderTime : reminderTimesArray) {
+                    // Combine the date and time
+                    Date parsedTime = timeFormat.parse(reminderTime);
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(parsedDate);
+                    Calendar timeCalendar = Calendar.getInstance();
+                    timeCalendar.setTime(parsedTime);
+
+                    calendar.set(Calendar.HOUR_OF_DAY, timeCalendar.get(Calendar.HOUR_OF_DAY));
+                    calendar.set(Calendar.MINUTE, timeCalendar.get(Calendar.MINUTE));
+
+                    // Create a Reminder object for each combination
+                    Reminder reminder = new Reminder();
+                    reminder.setMedicationId(medicationId);
+                    reminder.setReminderTime(new java.sql.Time(calendar.getTime().getTime())); // Set the java.sql.Time object
+                    reminder.setDate(new java.sql.Date(calendar.getTime().getTime())); // Set the java.sql.Date object
+
+                    //System.out.println(reminder);
+                    reminderMapper.createReminder(reminder);
+                    reminderMapper.updateDateTime(reminder.getReminderId());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Handle parsing JSON or other exceptions
+        }
     }
 
     public void createDailyReminders(String reminderTimesJson, int medicationId, Date startDate, Date endDate) {
@@ -52,7 +88,7 @@ public class ReminderService {
                         reminder.setReminderTime(time);
                         reminder.setDate(new java.sql.Date(calendar.getTime().getTime())); // Set the java.sql.Date object
 
-                        System.out.println(reminder);
+                        //System.out.println(reminder);
                         // 将提醒时间插入到数据库中
                         reminderMapper.createReminder(reminder);
                         reminderMapper.updateDateTime(reminder.getReminderId());
@@ -113,21 +149,21 @@ public class ReminderService {
         return formatDateString(reminderList.get(0).getReminderDateTime(),reminderList.get(0).getReminderTime());
     }
 
-    private String formatDateString(Date date,Time time) {
-
+    private String formatDateString(Date date, Time time) {
         Date today = new Date();
         Date tomorrow = new Date(today.getTime() + (1000 * 60 * 60 * 24));
+
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
 
         if (dateFormat.format(date).equals(dateFormat.format(today))) {
-            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
             return "Today, " + timeFormat.format(time);
         } else if (dateFormat.format(date).equals(dateFormat.format(tomorrow))) {
-            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
             return "Tomorrow, " + timeFormat.format(time);
         } else {
-            SimpleDateFormat format = new SimpleDateFormat("HH:mm, MMM d");
-            return format.format(date);
+            long diffInMillis = date.getTime() - today.getTime();
+            long daysDiff = diffInMillis / (1000 * 60 * 60 * 24);
+            return "In " + daysDiff + " days, " + timeFormat.format(time);
         }
     }
 

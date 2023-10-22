@@ -31,11 +31,15 @@ public class MedicationService {
         medicationMapper.insertMedication(medication);
         int medicationId = medication.getMedicationId();
 
-        if(medication.getFrequency()=="Daily medication")
+
+        if(medication.getFrequency().equals("Daily medication"))
         {
             reminderService.createDailyReminders(medication.getReminderTimes(),medicationId,medication.getStartDate(),medication.getEndDate());
         }
-        else if(medication.getFrequency()=="Daily medication")
+        else if(medication.getFrequency().equals("Intermittent medication"))
+        {
+            reminderService.createIntermittentReminders(medication.getReminderTimes(),medicationId,medication.getReminderDate());
+        }
         userMapper.addPointsToUser(150,medication.getUserId());
     }
 
