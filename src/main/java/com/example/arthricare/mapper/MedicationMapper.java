@@ -10,18 +10,28 @@ import java.util.List;
 @Mapper
 public interface MedicationMapper {
 
-    @Insert("INSERT INTO Medications (user_id, medication_type, medication_name, medication_category, frequency, dosage_unit, start_date, end_date, note) " +
-            "VALUES (#{userId}, #{medicationType}, #{medicationName}, #{medicationCategory}, #{frequency}, #{dosageUnit}, #{startDate}, #{endDate}, #{note})")
+    @Insert("INSERT INTO Medications " +
+            "(user_id, medication_name, " +
+            "medication_category, frequency, dosage_unit, " +
+            "start_date, end_date, note," +
+            "reminder_Date,reminder_times,duration) " +
+            "VALUES (#{userId},  #{medicationName}, #{medicationCategory}, " +
+            "#{frequency}, #{dosageUnit}, " +
+            "#{startDate}, #{endDate}, #{note}," +
+            "#{reminderDate},#{reminderTimes},#{duration})")
     @Options(useGeneratedKeys = true, keyProperty = "medicationId", keyColumn = "medication_id")
     void insertMedication(Medication medication);
 
-    @Update("UPDATE medications SET user_id = #{userId}, medication_type = #{medicationType}, medication_name = #{medicationName}, " +
-            "medication_category = #{medicationCategory}, frequency = #{frequency}, dosage_unit = #{dosageUnit}, " +
-            "start_date = #{startDate}, end_date = #{endDate}, note = #{note} WHERE medication_id = #{medicationId}")
+    @Update("UPDATE medications SET " +
+            "dosage_unit = #{dosageUnit}, " +
+            "end_date = #{endDate}, " +
+            "note = #{note},duration = #{duration}, " +
+            "reminder_times = #{reminderTimes},reminder_Date = #{reminderDate}" +
+            "WHERE medication_id = #{medicationId}")
     void updateMedication(Medication medication);
 
-    @Delete("DELETE FROM medications WHERE id = #{id}")
-    void deleteMedication(int id);
+    @Delete("DELETE FROM medications WHERE medication_id = #{medication_id}")
+    void deleteMedication(int medication_id);
 
     @Select("SELECT * FROM medications WHERE medication_id = #{medication_id}")
     @Results({
@@ -32,7 +42,10 @@ public interface MedicationMapper {
             @Result(property = "startDate", column = "start_date"),
             @Result(property = "endDate", column = "end_date"),
             @Result(property = "medicationExpiration", column = "medicationExpiration"),
-            @Result(property = "note", column = "note")
+            @Result(property = "note", column = "note"),
+            @Result(property = "duration", column = "duration"),
+            @Result(property = "reminderTimes", column = "reminder_times"),
+            @Result(property = "reminderDate", column = "reminder_Date")
     })
     Medication findById(int medication_id);
 

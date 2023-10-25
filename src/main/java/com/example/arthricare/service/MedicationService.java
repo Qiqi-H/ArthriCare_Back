@@ -45,11 +45,13 @@ public class MedicationService {
 
     public void updateMedication(Medication medication) {
         medicationMapper.updateMedication(medication);
-        reminderService.updateReminder(medication.getReminderTimes(),medication.getMedicationId(),medication.getStartDate(),medication.getEndDate());
+        reminderService.updateReminder(medication);
     }
 
-    public void deleteMedication(int id) {
-        medicationMapper.deleteMedication(id);
+    public void deleteMedication(int medicationId) {
+
+        reminderService.deleteReminderByMedicationId(medicationId);
+        medicationMapper.deleteMedication(medicationId);
     }
 
     public Medication getMedicationById(int id) {
@@ -107,6 +109,7 @@ public class MedicationService {
             return reminderService.checkMedicationExpiration(medicationId);
         }
     }
+
 }
 
 

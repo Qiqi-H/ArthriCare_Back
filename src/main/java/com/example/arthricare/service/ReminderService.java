@@ -1,6 +1,8 @@
 package com.example.arthricare.service;
 
+import com.example.arthricare.bean.Medication;
 import com.example.arthricare.bean.Reminder;
+import com.example.arthricare.bean.valueObject.MyMedPageReminderData;
 import com.example.arthricare.mapper.ReminderMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
@@ -107,10 +109,23 @@ public class ReminderService {
         // 在这里继续处理其他Medication属性，将药物信息插入到数据库等操作
     }
 
-    public void updateReminder(String reminderTimesJson, int medicationId, Date startDate, Date endDate)
+    public void updateReminder(Medication m)
+    {
+        deleteReminderByMedicationId(m.getMedicationId());
+
+        if(m.getFrequency().equals("Daily medication"))
+        {   System.out.println("Daily medication");
+            createDailyReminders(m.getReminderTimes(),m.getMedicationId(),m.getStartDate(),m.getEndDate());
+        }else if(m.getFrequency().equals("Intermittent medication"))
+        {
+            System.out.println("Intermittent medication");
+            createIntermittentReminders(m.getReminderTimes(),m.getMedicationId(),m.getReminderDate());
+        }
+    }
+
+    public void deleteReminderByMedicationId(int medicationId)
     {
         reminderMapper.deleteReminderByMedicationId(medicationId);
-        createDailyReminders(reminderTimesJson,medicationId,startDate,endDate);
     }
 
     private boolean isSameDay(Date date1, Date date2) {
@@ -124,7 +139,7 @@ public class ReminderService {
     }
 
 
-    public String findNextReminderTime(long medicationId) {
+    public MyMedPageReminderData findNextReminderTime(long medicationId) {
         List<Reminder> reminderList = reminderMapper.findReminderByMedicationId(medicationId);
 
         // Sort the list based on reminderDateTime
@@ -138,15 +153,20 @@ public class ReminderService {
         Date currentDate = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm, MMM d");
 
+        MyMedPageReminderData data = new MyMedPageReminderData();
         // Find the first reminderDateTime that is after the current time
         for (Reminder r : reminderList) {
             if (r.getReminderDateTime().after(currentDate)) {
-                return formatDateString(r.getReminderDateTime(),r.getReminderTime());
+                data.setReminderDate(r.getReminderDateTime());
+                data.setReminderMessage(formatDateString(r.getReminderDateTime(),r.getReminderTime()));
+                return data;
             }
         }
 
+        data.setReminderDate(reminderList.get(0).getReminderDateTime());
+        data.setReminderMessage(formatDateString(reminderList.get(0).getReminderDateTime(),reminderList.get(0).getReminderTime()));
         // If no reminderDateTime is after the current time, return the first reminderDateTime (cycling)
-        return formatDateString(reminderList.get(0).getReminderDateTime(),reminderList.get(0).getReminderTime());
+        return data;
     }
 
     private String formatDateString(Date date, Time time) {
@@ -162,7 +182,7 @@ public class ReminderService {
             return "Tomorrow, " + timeFormat.format(time);
         } else {
             long diffInMillis = date.getTime() - today.getTime();
-            long daysDiff = diffInMillis / (1000 * 60 * 60 * 24);
+            long daysDiff = (long) Math.ceil((double) diffInMillis / (1000 * 60 * 60 * 24));
             return "In " + daysDiff + " days, " + timeFormat.format(time);
         }
     }

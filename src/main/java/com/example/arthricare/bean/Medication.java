@@ -10,7 +10,6 @@ public class Medication {
 
     private int medicationId;
     private int userId;
-    private String medicationType;
     private String medicationName;
     private String medicationCategory;
     private String frequency;
@@ -27,6 +26,8 @@ public class Medication {
     private String reminderTimes;
 
     private boolean medicationExpiration;
+
+    private String duration;
     public Medication() {
     }
 
@@ -44,14 +45,6 @@ public class Medication {
 
     public void setUserId(int userId) {
         this.userId = userId;
-    }
-
-    public String getMedicationType() {
-        return medicationType;
-    }
-
-    public void setMedicationType(String medicationType) {
-        this.medicationType = medicationType;
     }
 
     public String getMedicationName() {
@@ -134,12 +127,19 @@ public class Medication {
         this.reminderDate = reminderDate;
     }
 
+    public String getDuration() {
+        return duration;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration;
+    }
+
     @Override
     public String toString() {
         return "Medication{" +
                 "medicationId=" + medicationId +
                 ", userId=" + userId +
-                ", medicationType='" + medicationType + '\'' +
                 ", medicationName='" + medicationName + '\'' +
                 ", medicationCategory='" + medicationCategory + '\'' +
                 ", frequency='" + frequency + '\'' +
@@ -150,6 +150,7 @@ public class Medication {
                 ", reminderDate='" + reminderDate + '\'' +
                 ", reminderTimes='" + reminderTimes + '\'' +
                 ", medicationExpiration=" + medicationExpiration +
+                ", duration='" + duration + '\'' +
                 '}';
     }
 }

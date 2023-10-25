@@ -4,6 +4,7 @@ import com.example.arthricare.bean.Medication;
 import com.example.arthricare.bean.valueObject.HomePageData;
 import com.example.arthricare.bean.valueObject.HomePageMedData;
 import com.example.arthricare.service.MedicationService;
+import com.example.arthricare.service.ReminderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -17,10 +18,13 @@ import java.util.List;
 @RequestMapping("/medications")
 public class MedicationController {
     private final MedicationService medicationService;
+    private final ReminderService reminderService;
 
     @Autowired
-    public MedicationController(MedicationService medicationService) {
+    public MedicationController(MedicationService medicationService,ReminderService reminderService) {
+
         this.medicationService = medicationService;
+        this.reminderService = reminderService;
     }
 
     @PostMapping("/create")
@@ -40,11 +44,6 @@ public class MedicationController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMedication(@PathVariable("id") Integer id) {
-        medicationService.deleteMedication(id);
-        return ResponseEntity.noContent().build();
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<Medication> getMedicationById(@PathVariable("id") Integer id) {
@@ -95,6 +94,21 @@ public class MedicationController {
             medicationService.updateMedicationExpirationStatues(medicationId,false);
             return  ResponseEntity.ok(false);
         }
+    }
+
+    @PutMapping("updateMedicationExpiration/{medicationId}")
+    public ResponseEntity<String> updateMedicationExpiration(@PathVariable("medicationId") int medicationId)
+    {
+        medicationService.updateMedicationExpirationStatues(medicationId,true);
+
+        return  ResponseEntity.ok(reminderService.checkMedicationTakeTime(medicationId));
+    }
+
+    @DeleteMapping("deleteMedication/{medicationId}")
+    public ResponseEntity<String> deleteMedication(@PathVariable("medicationId") int medicationId)
+    {
+        medicationService.deleteMedication(medicationId);
+        return  ResponseEntity.ok("delete Success");
     }
     //https://www.runoob.com/w3cnote/javascript-autocomplete.html
     //qu dou dong

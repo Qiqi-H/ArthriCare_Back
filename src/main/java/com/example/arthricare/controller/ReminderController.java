@@ -3,6 +3,7 @@ package com.example.arthricare.controller;
 
 import com.example.arthricare.bean.Reminder;
 import com.example.arthricare.bean.valueObject.HomePageData;
+import com.example.arthricare.bean.valueObject.MyMedPageReminderData;
 import com.example.arthricare.service.ReminderService;
 import jakarta.annotation.Resource;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class ReminderController {
     }
 
     @GetMapping("findNextReminderTime/{medicationId}")
-    public ResponseEntity<String> findNextReminderTime(@PathVariable("medicationId") Long medicationId) {
+    public ResponseEntity<MyMedPageReminderData> findNextReminderTime(@PathVariable("medicationId") Long medicationId) {
         return  ResponseEntity.ok(reminderService.findNextReminderTime(medicationId));
     }
 
