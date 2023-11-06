@@ -12,8 +12,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableWebMvc
 public class WebConfig implements WebMvcConfigurer {
 
-    @Value("${image-save-path}")
+    @Value("${post-image-save-path}")
     private String fileSavePath;
+    @Value("${avatar-image-save-path}")
+    private String avatarSavePath;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -22,6 +24,7 @@ public class WebConfig implements WebMvcConfigurer {
 
         registry.addResourceHandler("/uploadImages/**").addResourceLocations("file:"+fileSavePath);
 
+        registry.addResourceHandler("/avatar/**").addResourceLocations("file:"+avatarSavePath);
         //System.out.println("file:"+fileSavePath);
     }
 

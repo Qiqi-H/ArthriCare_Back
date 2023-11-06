@@ -26,12 +26,17 @@ public class UserRewardService {
         return userMapper.findUserScoreById(id);
     }
 
+    public int getPuzzleNum(long id){ return rewardMapper.getPuzzleNum(id);}
 
+    public void updatePuzzleNum(int id){
+        rewardMapper.updatePuzzleNum(id);
+    }
     public void claimLoginReward(int id)
     {
         Date loginRewardClaimedDate = new Date();
         rewardMapper.claimLoginReward(false,loginRewardClaimedDate,id);
         userMapper.addPointsToUser(35,id);
+        updatePuzzleNum(id);
     }
 
     public boolean checkLoginRewardClaimedStatue(long id)

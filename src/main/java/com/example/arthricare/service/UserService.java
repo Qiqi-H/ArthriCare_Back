@@ -91,5 +91,9 @@ public class UserService {
         userMapper.updateUserInformation(user);
         return "update successfully";
     }
+
+    public String getUserAvatar(int userId){
+        return  userMapper.getUserAvatar(userId);
+    }
 }
 

@@ -5,16 +5,35 @@ import java.util.Date;
 public class loginReward {
 
 
-    private boolean loginRewardClaimed;
+    private boolean canClaimedLoginReward;
+    private int puzzleNum;
 
-    private Date loginRewardClaimedDate;
-
-    private int point;
-
-    public loginReward(boolean loginRewardClaimed, Date loginRewardClaimedDate) {
-        this.loginRewardClaimed = loginRewardClaimed;
-        this.loginRewardClaimedDate = loginRewardClaimedDate;
-        this.point = 35;
+    public loginReward(boolean canClaimedLoginReward, int puzzleNum) {
+        this.canClaimedLoginReward = canClaimedLoginReward;
+        this.puzzleNum = puzzleNum;
     }
 
+    public boolean isCanClaimedLoginReward() {
+        return canClaimedLoginReward;
+    }
+
+    public void setCanClaimedLoginReward(boolean canClaimedLoginReward) {
+        this.canClaimedLoginReward = canClaimedLoginReward;
+    }
+
+    public int getPuzzleNum() {
+        return puzzleNum;
+    }
+
+    public void setPuzzleNum(int puzzleNum) {
+        this.puzzleNum = puzzleNum;
+    }
+
+    @Override
+    public String toString() {
+        return "loginReward{" +
+                "canClaimedLoginReward=" + canClaimedLoginReward +
+                ", puzzleNum=" + puzzleNum +
+                '}';
+    }
 }

@@ -1,6 +1,7 @@
 package com.example.arthricare.controller;
 
 
+import com.example.arthricare.bean.valueObject.loginReward;
 import com.example.arthricare.service.UserRewardService;
 import jakarta.annotation.Resource;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,12 @@ public class RewardController {
     public ResponseEntity<Integer> getUserById(@PathVariable("userId") int userId) {
        int point = userRewardService.getPoint(userId);
        return ResponseEntity.ok(point);
+
+    }
+
+    @GetMapping("getPuzzleNumByUserId/{userId}")
+    public ResponseEntity<Integer> getPuzzleNumByUserId(@PathVariable("userId") int userId) {
+        return ResponseEntity.ok(userRewardService.getPuzzleNum(userId));
 
     }
 

@@ -12,6 +12,10 @@ public class User {
     private String email;
     private String password;
     private int point;
+    private int height;
+    private String weightUnit;
+    private String heightUnit;
+
 
     // 默认构造函数
     public User() {}
@@ -91,17 +95,42 @@ public class User {
         this.point = this.point+point;
     }
 
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
+
+    public String getWeightUnit() {
+        return weightUnit;
+    }
+
+    public void setWeightUnit(String weightUnit) {
+        this.weightUnit = weightUnit;
+    }
+
+    public String getHeightUnit() {
+        return heightUnit;
+    }
+
+    public void setHeightUnit(String heightUnit) {
+        this.heightUnit = heightUnit;
+    }
+
     @Override
     public String toString() {
         return "User{" +
-                "user id=" + userId +
+                "userId=" + userId +
                 ", name='" + name + '\'' +
                 ", age=" + age +
                 ", gender='" + gender + '\'' +
                 ", weight=" + weight +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
-                ", point='" + point + '\'' +
+                ", point=" + point +
+                ", height=" + height +
                 '}';
     }
 }

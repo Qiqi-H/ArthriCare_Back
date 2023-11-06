@@ -77,6 +77,7 @@ public class MedicationController {
     @PostMapping("/findMedicationByUserIdAndDate")
     public ResponseEntity<List<HomePageMedData>> findMedicationByUserIdAndDate(@RequestBody HomePageData homePageData) {
 
+        System.out.println(medicationService.findMedicationByUserIdAndDate(homePageData));
         return ResponseEntity.ok(medicationService.findMedicationByUserIdAndDate(homePageData));
     }
 

@@ -5,6 +5,7 @@ import com.example.arthricare.bean.Reminder;
 import com.example.arthricare.bean.valueObject.HomePageData;
 import com.example.arthricare.bean.valueObject.MyMedPageReminderData;
 import com.example.arthricare.service.ReminderService;
+import com.example.arthricare.service.UserRewardService;
 import jakarta.annotation.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +19,11 @@ import java.util.List;
 public class ReminderController {
     @Resource
     private final ReminderService reminderService;
+    private final UserRewardService userRewardService;
 
-    public ReminderController(ReminderService reminderService) {
+    public ReminderController(ReminderService reminderService, UserRewardService userRewardService) {
         this.reminderService = reminderService;
+        this.userRewardService = userRewardService;
     }
 
     @PostMapping("/createReminder")
@@ -38,7 +41,8 @@ public class ReminderController {
     public void processDate(@RequestBody HomePageData homePageData) {
 
         reminderService.takeMedication(homePageData.getReminderId(),homePageData.getTakeMedTime());
-
+        System.out.println(homePageData);
+        userRewardService.updatePuzzleNum(homePageData.getUserId());
     }
 
     @GetMapping("checkMedicationTakeTimes/{medicationId}")
@@ -49,6 +53,11 @@ public class ReminderController {
     @GetMapping("findUniqueReminderTimeByMedicationId/{medicationId}")
     public ResponseEntity<List<Time>> findUniqueReminderTimeByMedicationId(@PathVariable("medicationId") Long medicationId) {
         return ResponseEntity.ok(reminderService.findUniqueReminderTimeByMedicationId(medicationId));
+    }
+
+    @GetMapping("findReminderByReminderId/{reminderId}")
+    public ResponseEntity<Reminder> findReminderByReminderId(@PathVariable("reminderId") Long reminderId) {
+        return ResponseEntity.ok(reminderService.findReminderByReminderId(reminderId));
     }
 
 }

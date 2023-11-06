@@ -18,10 +18,13 @@ import java.util.UUID;
 @Service
 public class uploadImageService {
 
-    @Value("${image-save-path}")
-    private String uploadDir;
+    @Value("${post-image-save-path}")
+    private String uploadPostDir;
     @Value("${puzzle-image-save-path}")
     private String uploadPuzzleDir;
+    private String uploadReplyDir;
+    @Value("${avatar-image-save-path}")
+    private String uploadAvatarDir;
     private final uploadImageMapper uploadImageMapper;
 
     public uploadImageService(com.example.arthricare.mapper.uploadImageMapper uploadImageMapper) {
@@ -29,14 +32,14 @@ public class uploadImageService {
     }
 
     public void uploadPostImage(int postId, MultipartFile image) throws IOException {
-        uploadImageMapper.savePostImage(postId,saveImage(image));;
+        uploadImageMapper.savePostImage(postId,saveImage(image,uploadPostDir));
     }
 
     public void uploadReplyImage(int replyId,MultipartFile image) throws IOException {
-        saveImage(image);
+        saveImage(image,uploadReplyDir);
     }
 
-    private String saveImage(MultipartFile image) throws IOException {
+    private String saveImage(MultipartFile image, String customUploadDir) throws IOException {
         if (image.isEmpty()) {
             throw new IllegalArgumentException("Image file is empty");
         }
@@ -45,7 +48,7 @@ public class uploadImageService {
         String uniqueFileName = generateUniqueFileName();
 
         // 创建保存文件的路径
-        Path uploadPath = Path.of(uploadDir);
+        Path uploadPath = Path.of(customUploadDir);
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
@@ -53,7 +56,10 @@ public class uploadImageService {
         // 将文件保存到指定路径
         Path filePath = uploadPath.resolve(uniqueFileName);
         Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-        String relativeFilePath = "uploadImages\\"+filePath.toString().replace(uploadDir, "");
+
+        // 动态生成 relativeFilePath，使用 customUploadDir 中最后一个文件夹的名字
+        String lastFolder = uploadPath.getFileName().toString();
+        String relativeFilePath = lastFolder + "\\" + filePath.toString().replace(customUploadDir, "");
 
         // 返回图片的路径
         return relativeFilePath;
@@ -63,6 +69,10 @@ public class uploadImageService {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         String uuid = UUID.randomUUID().toString();
         return uuid + "_" + timestamp + ".png"; // 添加 .png 扩展名
+    }
+
+    public void uploadAvatarImage(int userId, MultipartFile image) throws IOException {
+        uploadImageMapper.saveAvatarImage(userId,saveImage(image,uploadAvatarDir));
     }
 
     public void uploadPuzzleImage(int puzzleId, MultipartFile image) throws IOException {

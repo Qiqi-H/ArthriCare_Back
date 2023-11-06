@@ -39,5 +39,6 @@ public interface UserMapper {
     @Update("UPDATE users SET password = #{newPassword} WHERE email = #{email}")
     void resetPasswordByEmail(@Param("newPassword") String newPassword, @Param("email") String email);
 
-
+    @Select("SELECT avatar_path from users where user_id = #{user_id}")
+    String getUserAvatar(@Param("user_id")int user_id);
 }

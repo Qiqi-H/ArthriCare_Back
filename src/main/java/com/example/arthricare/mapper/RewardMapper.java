@@ -28,4 +28,10 @@ public interface RewardMapper {
 
     @Update("UPDATE rewards SET profileRewardClaimed = #{profileRewardClaimed} WHERE user_id = #{id}")
     void changeProfileRewardStatue(boolean profileRewardClaimed, long id);
+
+    @Update("UPDATE rewards SET puzzle_num = puzzle_num+1 WHERE user_id = #{id}")
+    void updatePuzzleNum(long id);
+
+    @Select("SELECT puzzle_num from rewards WHERE user_id = #{id}")
+    int getPuzzleNum(long id);
 }

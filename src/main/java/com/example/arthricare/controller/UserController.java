@@ -87,5 +87,8 @@ public class UserController {
     }
 
 
-
+    @GetMapping("getUserAvatar/{userId}")
+    public ResponseEntity<String> getUserAvatar(@PathVariable("userId") int userId) {
+        return ResponseEntity.ok(userService.getUserAvatar(userId));
+    }
 }

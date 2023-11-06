@@ -36,6 +36,22 @@ public class uploadImageController {
         }
     }
 
+    @PostMapping("/avatarImage")
+    public ResponseEntity<String> createAvatarImage(
+            @RequestParam("userId") int userId,
+            @RequestParam("image") MultipartFile image
+    ) {
+        try {
+            uploadImageService.uploadAvatarImage(userId, image);
+            return ResponseEntity.ok("upload successfully");
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to upload the image due to an I/O error.");
+        }
+    }
+
+
+
     @PostMapping("/replyImage")
     public ResponseEntity<String> createReplyImage(
             @RequestParam("replyId") int postId,

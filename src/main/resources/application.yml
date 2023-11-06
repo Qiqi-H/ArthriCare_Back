@@ -5,9 +5,9 @@ spring:
     username: root
     password: root
 
-image-save-path: D:\321Project\ArthriCare git\ArthriCare_Back\src\main\resources\static\uploadImages\
+post-image-save-path: D:\321Project\ArthriCare git\ArthriCare_Back\src\main\resources\static\uploadImages\
 puzzle-image-save-path: D:\321Project\ArthriCare git\ArthriCare_Back\src\main\resources\static\puzzleImage\
-
+avatar-image-save-path: D:\321Project\ArthriCare git\ArthriCare_Back\src\main\resources\static\avatar\
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
